@@ -1,0 +1,150 @@
+.container {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 80vh;
+}
+
+.notFound {
+  text-align: center;
+  padding: 4rem;
+  font-size: 1.5rem;
+  color: #666;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #666;
+  text-decoration: none;
+  margin-bottom: 2rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: var(--color-blue);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 3rem;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.imageWrapper {
+  background: white;
+  border-radius: 30px;
+  overflow: hidden;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+  aspect-ratio: 1;
+}
+
+.imageWrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.category {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-blue);
+  font-weight: 700;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.info h1 {
+  font-size: 2.5rem;
+  line-height: 1.1;
+  margin-bottom: 1rem;
+  color: #222;
+}
+
+.price {
+  font-size: 2rem;
+  font-weight: 300;
+  color: var(--color-green);
+  margin-bottom: 2rem;
+}
+
+.description {
+  line-height: 1.8;
+  color: #555;
+  margin-bottom: 2.5rem;
+  font-size: 1.1rem;
+}
+
+.actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.buyButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  background: #25D366; /* WhatsApp Green */
+  color: white;
+  text-decoration: none;
+  padding: 1rem;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  transition: all 0.3s;
+  box-shadow: 0 5px 20px rgba(37, 211, 102, 0.3);
+}
+
+.buyButton:hover {
+  background: #20b356;
+  transform: translateY(-3px);
+}
+
+.wishlistButton {
+  width: 60px;
+  border-radius: 12px;
+  background: #fff;
+  border: 2px solid #f0f0f0;
+  color: var(--color-red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+}
+
+.wishlistButton:hover {
+  border-color: var(--color-red-light);
+  background: var(--color-red-light);
+}
+
+.features {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.featureItem {
+  background: #f9f9f9;
+  padding: 0.8rem;
+  border-radius: 8px;
+  font-weight: 500;
+  color: #666;
+  text-align: center;
+}

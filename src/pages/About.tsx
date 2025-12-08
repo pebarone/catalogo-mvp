@@ -1,0 +1,37 @@
+import { motion } from 'framer-motion';
+import { Heart } from 'lucide-react';
+import styles from './About.module.css';
+
+export const About = () => {
+  return (
+    <div className={styles.page}>
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={styles.content}
+      >
+        <h1>Sobre a Mel</h1>
+        <div className={styles.divider}></div>
+        
+        <div className={styles.story}>
+          <p>
+            Olá! Sou a Mel, a criadora por trás da <strong>Mel Colorindo a Vida</strong>. 
+          </p>
+          <p>
+            Tudo começou em 2020, com o desejo de trazer mais cor e alegria para o dia a dia das pessoas. 
+            Cada peça é feita à mão, com muito cuidado e carinho, pensando em cada detalhe para que você se sinta especial.
+          </p>
+          <p>
+            Nossa missão é espalhar sorrisos através de acessórios divertidos e encantados. 
+            Acreditamos que a vida é muito curta para usar acessórios sem graça!
+          </p>
+        </div>
+
+        <div className={styles.signature}>
+           <p>Com amor,</p>
+           <h3>Mel Salomão <Heart size={16} fill="var(--color-red)" color="var(--color-red)" /></h3>
+        </div>
+      </motion.div>
+    </div>
+  );
+};

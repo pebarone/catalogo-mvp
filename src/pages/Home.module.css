@@ -1,0 +1,219 @@
+.home {
+  overflow: hidden;
+}
+
+.hero {
+  min-height: 90vh;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: center;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 3rem;
+  position: relative;
+}
+
+@media (min-width: 900px) {
+  .hero {
+    grid-template-columns: 1.2fr 1fr;
+  }
+}
+
+.heroContent {
+  z-index: 2;
+}
+
+.heroBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-yellow-light);
+  color: #9d7f00;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-yellow);
+}
+
+.title {
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.gradientText {
+  background: var(--rainbow-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 1.2rem;
+  color: #666;
+  margin-bottom: 2.5rem;
+  max-width: 500px;
+  line-height: 1.6;
+}
+
+.ctaButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: #333;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 3rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.ctaButton:hover {
+  background: var(--color-blue);
+  transform: translateY(-3px);
+  box-shadow: 0 15px 30px rgba(25, 130, 196, 0.3);
+}
+
+.heroVisual {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.heroImage {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 30px;
+  position: relative;
+  z-index: 2;
+  box-shadow: 20px 20px 0 var(--color-orange-light);
+  transform: rotate(-2deg);
+  transition: transform 0.5s;
+}
+
+.heroVisual:hover .heroImage {
+  transform: rotate(0deg) scale(1.02);
+}
+
+.blob1, .blob2, .blob3 {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  z-index: 1;
+  opacity: 0.6;
+  animation: float 10s infinite ease-in-out;
+}
+
+.blob1 {
+  top: -20%;
+  right: -20%;
+  width: 300px;
+  height: 300px;
+  background: var(--color-red-light);
+  animation-delay: 0s;
+}
+
+.blob2 {
+  bottom: -10%;
+  left: -10%;
+  width: 250px;
+  height: 250px;
+  background: var(--color-blue-light);
+  animation-delay: 2s;
+}
+
+.blob3 {
+  top: 40%;
+  right: 40%;
+  width: 200px;
+  height: 200px;
+  background: var(--color-yellow-light);
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(30px, -30px) rotate(10deg); }
+  66% { transform: translate(-20px, 20px) rotate(-5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.featured {
+  padding: 4rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 2rem;
+}
+
+.sectionHeader h2 {
+  font-size: 2rem;
+  color: #333;
+}
+
+.seeAll {
+  color: var(--color-blue);
+  font-weight: 600;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+.cardLink {
+  text-decoration: none;
+  color: inherit;
+}
+
+.card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  transition: all 0.3s;
+}
+
+.cardImageWrapper {
+  overflow: hidden;
+  aspect-ratio: 1;
+}
+
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s;
+}
+
+.card:hover .cardImage {
+  transform: scale(1.1);
+}
+
+.cardContent {
+  padding: 1.5rem;
+}
+
+.cardContent h3 {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.price {
+  font-weight: 700;
+  color: var(--color-blue);
+  font-size: 1.2rem;
+}

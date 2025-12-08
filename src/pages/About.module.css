@@ -1,0 +1,71 @@
+.page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.content {
+  text-align: center;
+  background: white;
+  padding: 3rem;
+  border-radius: 30px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.05);
+  position: relative;
+  overflow: hidden;
+}
+
+.content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  background: var(--rainbow-gradient);
+}
+
+.content h1 {
+  font-size: 2.5rem;
+  color: var(--color-violet);
+  margin-bottom: 1rem;
+}
+
+.divider {
+  width: 60px;
+  height: 4px;
+  background: var(--color-yellow);
+  margin: 0 auto 2rem;
+  border-radius: 2px;
+}
+
+.story {
+  font-size: 1.2rem;
+  line-height: 1.8;
+  color: #555;
+  margin-bottom: 3rem;
+}
+
+.story p {
+  margin-bottom: 1.5rem;
+}
+
+.story strong {
+  color: var(--color-blue);
+}
+
+.signature {
+  font-family: 'Dancing Script', cursive; /* Assuming generic cursive fallback */
+}
+
+.signature h3 {
+  font-size: 1.8rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}

@@ -1,0 +1,114 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border-bottom: 2px solid transparent;
+  border-image: var(--rainbow-gradient-soft) 1;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  font-size: 1.5rem;
+  font-weight: 800;
+  text-decoration: none;
+  display: flex;
+  gap: 0.3rem;
+  align-items: center;
+}
+
+.logoText {
+  color: var(--color-violet);
+}
+
+.logoHighlight {
+  background: var(--rainbow-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.desktopMenu {
+  display: none;
+  gap: 2rem;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .desktopMenu {
+    display: flex;
+  }
+  .menuToggle {
+    display: none;
+  }
+}
+
+.navLink {
+  position: relative;
+  font-weight: 600;
+  color: #555;
+  padding: 0.5rem 0;
+  text-decoration: none;
+}
+
+.navLink:hover {
+  color: var(--color-blue);
+}
+
+.activeUnderline {
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--rainbow-gradient);
+  border-radius: 2px;
+}
+
+.menuToggle {
+  background: none;
+  border: none;
+  color: var(--color-violet);
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.mobileMenu {
+  background: white;
+  border-bottom: 1px solid var(--color-indigo-light);
+  overflow: hidden;
+}
+
+.mobileNavLink {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  color: #444;
+  font-weight: 600;
+  border-bottom: 1px solid #f0f0f0;
+  transition: background 0.2s;
+}
+
+.mobileNavLink:hover {
+  background: var(--color-blue-light);
+  color: var(--color-blue);
+}
+
+.iconWrapper {
+  color: var(--color-red);
+}
+
+.mobileNavLink:nth-child(2) .iconWrapper { color: var(--color-orange); }
+.mobileNavLink:nth-child(3) .iconWrapper { color: var(--color-green); }
+.mobileNavLink:nth-child(4) .iconWrapper { color: var(--color-blue); }
