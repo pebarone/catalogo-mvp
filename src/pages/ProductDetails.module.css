@@ -23,8 +23,19 @@
   transition: color 0.2s;
 }
 
+.backLink svg path,
+.backLink svg circle {
+  stroke: #666;
+  transition: stroke 0.2s;
+}
+
 .backLink:hover {
   color: var(--color-blue);
+}
+
+.backLink:hover svg path,
+.backLink:hover svg circle {
+  stroke: var(--color-blue);
 }
 
 .grid {
@@ -112,6 +123,10 @@
   box-shadow: 0 5px 20px rgba(37, 211, 102, 0.3);
 }
 
+.buyButton svg {
+  color: white; /* Garante que currentColor seja branco */
+}
+
 .buyButton:hover {
   background: #20b356;
   transform: translateY(-3px);
@@ -122,11 +137,15 @@
   border-radius: 12px;
   background: #fff;
   border: 2px solid #f0f0f0;
-  color: var(--color-red);
+  color: var(--color-red); /* Define a cor padrão */
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.3s;
+}
+
+.wishlistButton svg {
+  transition: transform 0.3s;
 }
 
 .wishlistButton:hover {
@@ -147,4 +166,118 @@
   font-weight: 500;
   color: #666;
   text-align: center;
+}
+
+/* Loading State */
+.loadingState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  gap: 1rem;
+}
+
+.loadingSpinner {
+  width: 48px;
+  height: 48px;
+  border: 4px solid #f0f0f0;
+  border-top-color: var(--color-violet);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loadingState p {
+  color: #666;
+  font-size: 1rem;
+}
+
+/* Not Found State */
+.notFound {
+  text-align: center;
+  padding: 4rem 2rem;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.notFound h2 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.notFound p {
+  color: #666;
+  margin-bottom: 2rem;
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--rainbow-gradient);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.backButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(106, 76, 147, 0.4);
+}
+
+/* Wishlist Button Active */
+.wishlistButton.active {
+  background: var(--color-red);
+  border-color: var(--color-red);
+  color: white; /* Ícone ficará branco automaticamente */
+}
+
+.wishlistButton.active:hover {
+  background: #c0392b;
+  border-color: #c0392b;
+}
+
+.wishlistButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
+.adminButton {
+  width: auto;
+  min-width: 60px;
+  padding: 0 1rem;
+  gap: 0.5rem;
+  border-radius: 12px;
+  background: var(--color-violet-light);
+  border: 2px solid transparent;
+  color: var(--color-violet); /* Ícone herdará esta cor */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.adminButton:hover {
+  background: var(--color-violet);
+  color: white; /* Ícone herdará branco */
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(106, 76, 147, 0.2);
+}
+
+.spinIcon {
+  animation: spin 0.8s linear infinite;
 }

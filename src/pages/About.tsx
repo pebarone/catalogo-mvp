@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Heart } from 'lucide-react';
+import { IconHeart } from '../components/Icons';
 import styles from './About.module.css';
 
 export const About = () => {
@@ -29,7 +29,7 @@ export const About = () => {
 
         <div className={styles.signature}>
            <p>Com amor,</p>
-           <h3>Mel Salomão <Heart size={16} fill="var(--color-red)" color="var(--color-red)" /></h3>
+           <h3>Mel Salomão <IconHeart size={16} fill="var(--color-red)" color="var(--color-red)" /></h3>
         </div>
       </motion.div>
     </div>

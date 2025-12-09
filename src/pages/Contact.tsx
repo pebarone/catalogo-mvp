@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Instagram, Mail, MapPin, Smartphone } from 'lucide-react';
+import { IconInstagram, IconMail, IconMapPin, IconPhone } from '../components/Icons';
 import styles from './Contact.module.css';
 
 export const Contact = () => {
@@ -16,7 +16,7 @@ export const Contact = () => {
         <div className={styles.links}>
           <a href="https://instagram.com/mel_colorindo_a_vida" target="_blank" rel="noopener noreferrer" className={styles.linkItem}>
             <div className={`${styles.iconBox} ${styles.insta}`}>
-              <Instagram size={24} />
+              <IconInstagram size={24} />
             </div>
             <div>
               <h3>Instagram</h3>
@@ -26,7 +26,7 @@ export const Contact = () => {
 
           <a href="mailto:contato@mel.com" className={styles.linkItem}>
             <div className={`${styles.iconBox} ${styles.email}`}>
-              <Mail size={24} />
+              <IconMail size={24} />
             </div>
             <div>
               <h3>Email</h3>
@@ -36,7 +36,7 @@ export const Contact = () => {
 
           <a href="https://wa.me/5511972969552" target="_blank" rel="noopener noreferrer" className={styles.linkItem}>
             <div className={`${styles.iconBox} ${styles.whatsapp}`}>
-              <Smartphone size={24} />
+              <IconPhone size={24} />
             </div>
             <div>
               <h3>WhatsApp</h3>
@@ -46,7 +46,7 @@ export const Contact = () => {
         </div>
 
         <div className={styles.location}>
-           <MapPin size={16} /> Enviamos para todo o Brasil!
+           <IconMapPin size={16} /> Enviamos para todo o Brasil!
         </div>
       </motion.div>
     </div>

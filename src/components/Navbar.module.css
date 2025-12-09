@@ -83,6 +83,11 @@
   padding: 0.5rem;
 }
 
+.menuToggle svg path,
+.menuToggle svg line {
+  stroke: var(--color-violet);
+}
+
 .mobileMenu {
   background: white;
   border-bottom: 1px solid var(--color-indigo-light);
@@ -109,6 +114,141 @@
   color: var(--color-red);
 }
 
+.iconWrapper svg {
+  color: currentColor;
+}
+
+.iconWrapper svg path,
+.iconWrapper svg circle,
+.iconWrapper svg line,
+.iconWrapper svg rect {
+  stroke: currentColor;
+}
+
+.mobileNavLink:nth-child(1) .iconWrapper { color: var(--color-red); }
+.mobileNavLink:nth-child(1) .iconWrapper svg path,
+.mobileNavLink:nth-child(1) .iconWrapper svg line,
+.mobileNavLink:nth-child(1) .iconWrapper svg circle { stroke: var(--color-red); }
+
 .mobileNavLink:nth-child(2) .iconWrapper { color: var(--color-orange); }
+.mobileNavLink:nth-child(2) .iconWrapper svg path,
+.mobileNavLink:nth-child(2) .iconWrapper svg line,
+.mobileNavLink:nth-child(2) .iconWrapper svg circle { stroke: var(--color-orange); }
+
 .mobileNavLink:nth-child(3) .iconWrapper { color: var(--color-green); }
+.mobileNavLink:nth-child(3) .iconWrapper svg path,
+.mobileNavLink:nth-child(3) .iconWrapper svg line,
+.mobileNavLink:nth-child(3) .iconWrapper svg circle { stroke: var(--color-green); }
+
 .mobileNavLink:nth-child(4) .iconWrapper { color: var(--color-blue); }
+.mobileNavLink:nth-child(4) .iconWrapper svg path,
+.mobileNavLink:nth-child(4) .iconWrapper svg line,
+.mobileNavLink:nth-child(4) .iconWrapper svg circle { stroke: var(--color-blue); }
+
+.mobileNavLink:nth-child(5) .iconWrapper { color: var(--color-violet); }
+.mobileNavLink:nth-child(5) .iconWrapper svg path,
+.mobileNavLink:nth-child(5) .iconWrapper svg line,
+.mobileNavLink:nth-child(5) .iconWrapper svg circle,
+.mobileNavLink:nth-child(5) .iconWrapper svg rect { stroke: var(--color-violet); }
+
+/* Auth Button */
+.authButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-violet-light), var(--color-indigo-light));
+  border: none;
+  color: var(--color-violet);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* User Menu */
+.userMenu {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--color-violet-light);
+  padding: 0.35rem 0.75rem;
+  border-radius: 20px;
+  color: var(--color-violet);
+}
+
+.authButton:hover {
+  background: var(--rainbow-gradient);
+  color: white;
+  transform: scale(1.05);
+}
+
+.authButton svg {
+  transition: all 0.3s ease; /* Transição no elemento svg pai */
+}
+
+.authButton:hover svg path,
+.authButton:hover svg circle,
+.authButton:hover svg rect,
+.authButton:hover svg line {
+  stroke: white !important; /* Força branco no hover */
+}
+
+/* menuToggle stroke removido */
+
+/* User Menu */
+.userMenu {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.userEmail {
+  font-size: 0.85rem;
+  font-weight: 500;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Mobile Auth */
+.mobileAuth {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.mobileUserEmail {
+  font-size: 0.9rem;
+  color: #666;
+  padding: 0.5rem 0;
+}
+
+.mobileAuthButton {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--rainbow-gradient);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobileAuthButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(106, 76, 147, 0.3);
+}

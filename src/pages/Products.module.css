@@ -136,3 +136,76 @@
   font-weight: 600;
   color: var(--color-violet);
 }
+
+/* Loading Skeleton */
+.cardSkeleton {
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.skeletonImage {
+  aspect-ratio: 1;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonContent {
+  padding: 1.5rem;
+}
+
+.skeletonBadge {
+  height: 14px;
+  width: 60px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  margin-bottom: 0.75rem;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonTitle {
+  height: 24px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  animation: shimmer 1.5s infinite;
+}
+
+.skeletonPrice {
+  height: 28px;
+  width: 50%;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Empty State */
+.emptyState {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
+  background: linear-gradient(135deg, #fff 0%, var(--color-violet-light) 100%);
+  border-radius: 24px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.emptyState h3 {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.emptyState p {
+  color: #666;
+  font-size: 1rem;
+}

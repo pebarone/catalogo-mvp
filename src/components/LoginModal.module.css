@@ -1,0 +1,386 @@
+/* Login Modal Styles */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+
+.modal {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9ff 100%);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+  position: relative;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.modal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--rainbow-gradient);
+}
+
+.closeBtn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #555; /* Default color for icon */
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.closeBtn svg {
+  transition: color 0.2s ease;
+}
+
+.closeBtn:hover {
+  background: rgba(0, 0, 0, 0.2);
+  transform: rotate(90deg);
+  color: #000; /* Darker color on hover */
+}
+
+.closeBtn:hover svg {
+  color: #000;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.iconWrapper {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1rem;
+  background: var(--rainbow-gradient-soft);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.iconWrapper svg {
+  width: 32px;
+  height: 32px;
+  color: var(--color-violet);
+}
+
+/* SVG rules recolocadas explicitamente por segurança REMOVIDAS. Confiando em prop color + hover css */
+
+
+.closeBtn svg {
+  transition: stroke 0.2s ease;
+}
+
+.closeBtn:hover svg path,
+.closeBtn:hover svg line {
+  stroke: #000 !important;
+}
+
+.header h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: #666;
+  font-size: 0.95rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.inputGroup {
+  position: relative;
+}
+
+.inputGroup label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.inputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.inputIcon {
+  position: absolute;
+  left: 1rem;
+  color: #999;
+  pointer-events: none;
+  transition: color 0.2s ease;
+}
+
+.inputIcon path,
+.inputIcon circle,
+.inputIcon line {
+  stroke: #999;
+  transition: stroke 0.2s ease;
+}
+
+.inputWrapper:focus-within .inputIcon {
+  color: var(--color-violet);
+}
+
+.inputWrapper:focus-within .inputIcon path,
+.inputWrapper:focus-within .inputIcon circle,
+.inputWrapper:focus-within .inputIcon line {
+  stroke: var(--color-violet);
+}
+
+.inputGroup input {
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 2.75rem;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  background: #fff;
+}
+
+.inputGroup input:focus {
+  outline: none;
+  border-color: var(--color-violet);
+  box-shadow: 0 0 0 4px rgba(106, 76, 147, 0.1);
+}
+
+.inputGroup input::placeholder {
+  color: #bbb;
+}
+
+.togglePassword {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.togglePassword svg path,
+.togglePassword svg circle,
+.togglePassword svg line {
+  stroke: #999;
+  transition: stroke 0.2s ease;
+}
+
+.togglePassword:hover {
+  color: var(--color-violet);
+}
+
+.togglePassword:hover svg path,
+.togglePassword:hover svg circle,
+.togglePassword:hover svg line {
+  stroke: var(--color-violet);
+}
+
+.error {
+  background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+  border: 1px solid #ffcdd2;
+  border-radius: 12px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #c62828;
+  font-size: 0.9rem;
+}
+
+.error svg {
+  flex-shrink: 0;
+}
+
+.submitBtn {
+  background: var(--rainbow-gradient);
+  color: white;
+  border: none;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  margin-top: 0.5rem;
+}
+
+.submitBtn::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+}
+
+.submitBtn:hover::before {
+  left: 100%;
+}
+
+.submitBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(106, 76, 147, 0.4);
+}
+
+.submitBtn:active {
+  transform: translateY(0);
+}
+
+.submitBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.submitBtn:disabled:hover::before {
+  left: -100%;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.5rem 0;
+  color: #999;
+  font-size: 0.85rem;
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e8e8e8;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid #eee;
+}
+
+.footer p {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.footer a {
+  color: var(--color-violet);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer a:hover {
+  color: var(--color-indigo);
+  text-decoration: underline;
+}
+
+/* Animações */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal {
+  animation: modalIn 0.3s ease-out;
+}
+
+/* Responsivo */
+@media (max-width: 480px) {
+  .modal {
+    padding: 2rem 1.5rem;
+    border-radius: 20px;
+  }
+
+  .header h2 {
+    font-size: 1.5rem;
+  }
+
+  .iconWrapper {
+    width: 56px;
+    height: 56px;
+  }
+
+  .iconWrapper svg {
+    width: 28px;
+    height: 28px;
+  }
+}

@@ -1,11 +1,30 @@
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles } from 'lucide-react';
+import { IconArrowRight } from '../components/Icons';
 import styles from './Home.module.css';
-import { products } from '../data/products';
+import { productsApi } from '../services/api';
+import type { Product } from '../services/api';
 
 export const Home = () => {
-  const featuredProducts = products.slice(0, 3);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const products = await productsApi.getAll();
+        setFeaturedProducts(products.slice(0, 3));
+      } catch (error) {
+        console.error('Erro ao carregar produtos:', error);
+        setFeaturedProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   return (
     <div className={styles.home}>
@@ -38,7 +57,7 @@ export const Home = () => {
             transition={{ delay: 0.6 }}
           >
             <Link to="/produtos" className={styles.ctaButton}>
-              Ver Coleção <ArrowRight size={20} />
+              Ver Coleção <IconArrowRight size={20} />
             </Link>
           </motion.div>
         </div>
@@ -48,7 +67,7 @@ export const Home = () => {
            <div className={styles.blob2}></div>
            <div className={styles.blob3}></div>
            <img 
-             src="/produto1.jpg" 
+             src={featuredProducts[0]?.image_url || "/produto3.jpg"} 
              alt="Acessórios Coloridos" 
              className={styles.heroImage}
            />
@@ -63,22 +82,40 @@ export const Home = () => {
         </div>
         
         <div className={styles.grid}>
-          {featuredProducts.map((product) => (
-            <Link to={`/produto/${product.id}`} key={product.id} className={styles.cardLink}>
-              <motion.div 
-                whileHover={{ y: -10 }}
-                className={styles.card}
-              >
-                <div className={styles.cardImageWrapper}>
-                  <img src={product.image} alt={product.name} className={styles.cardImage} />
+          {isLoading ? (
+            // Loading skeleton
+            [1, 2, 3].map((i) => (
+              <div key={i} className={styles.cardSkeleton}>
+                <div className={styles.skeletonImage}></div>
+                <div className={styles.skeletonContent}>
+                  <div className={styles.skeletonTitle}></div>
+                  <div className={styles.skeletonPrice}></div>
                 </div>
-                <div className={styles.cardContent}>
-                  <h3>{product.name}</h3>
-                  <p className={styles.price}>R$ {product.price.toFixed(2)}</p>
-                </div>
-              </motion.div>
-            </Link>
-          ))}
+              </div>
+            ))
+          ) : featuredProducts.length > 0 ? (
+            featuredProducts.map((product) => (
+              <Link to={`/produto/${product.id}`} key={product.id} className={styles.cardLink}>
+                <motion.div 
+                  whileHover={{ y: -10 }}
+                  className={styles.card}
+                >
+                  <div className={styles.cardImageWrapper}>
+                    <img src={product.image_url || '/placeholder.jpg'} alt={product.name} className={styles.cardImage} />
+                  </div>
+                  <div className={styles.cardContent}>
+                    <h3>{product.name}</h3>
+                    <p className={styles.price}>R$ {Number(product.price || 0).toFixed(2)}</p>
+                  </div>
+                </motion.div>
+              </Link>
+            ))
+          ) : (
+            <div className={styles.emptyState}>
+              <p>Nenhum produto disponível no momento.</p>
+              <Link to="/contato" className={styles.ctaButton}>Entre em Contato</Link>
+            </div>
+          )}
         </div>
       </section>
     </div>

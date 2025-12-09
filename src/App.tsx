@@ -5,6 +5,8 @@ import { Products } from './pages/Products';
 import { ProductDetails } from './pages/ProductDetails';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
+import { Admin } from './pages/Admin';
+import { AuthProvider } from './contexts/AuthContext';
 import { useEffect } from 'react';
 
 const ScrollToTop = () => {
@@ -19,18 +21,21 @@ const ScrollToTop = () => {
 
 function App() {
   return (
-    <BrowserRouter>
-      <ScrollToTop />
-      <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
-          <Route path="produtos" element={<Products />} />
-          <Route path="produto/:id" element={<ProductDetails />} />
-          <Route path="sobre" element={<About />} />
-          <Route path="contato" element={<Contact />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <AuthProvider>
+      <BrowserRouter>
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="produtos" element={<Products />} />
+            <Route path="produto/:id" element={<ProductDetails />} />
+            <Route path="sobre" element={<About />} />
+            <Route path="contato" element={<Contact />} />
+            <Route path="admin" element={<Admin />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </AuthProvider>
   );
 }
 
