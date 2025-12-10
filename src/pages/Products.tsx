@@ -1,16 +1,24 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { productsApi } from '../services/api';
+import { productsApi, favoritesApi } from '../services/api';
 import type { Product } from '../services/api';
 import styles from './Products.module.css';
 import { getSubcategoryColor } from '../utils/subcategoryColors';
+import { useAuth } from '../contexts/AuthContext';
+import { IconHeart } from '../components/Icons';
+import { LoginModal } from '../components/LoginModal';
+import { RegisterModal } from '../components/RegisterModal';
 
 export const Products = () => {
+  const { isAuthenticated } = useAuth();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
@@ -37,6 +45,18 @@ export const Products = () => {
         const data = await productsApi.getAll(params);
         setProducts(data.products);
         setTotalProducts(data.total);
+
+        // Carregar favoritos se autenticado
+        if (isAuthenticated) {
+          try {
+            const favs = await favoritesApi.getAll();
+            setFavorites(new Set(favs.map((f: any) => f.product_id)));
+          } catch {
+            // Ignora erro de favoritos
+          }
+        } else {
+          setFavorites(new Set());
+        }
       } catch (error) {
         console.error('Erro ao carregar produtos:', error);
         setProducts([]);
@@ -47,7 +67,7 @@ export const Products = () => {
     };
 
     loadProducts();
-  }, [currentPage, selectedCategory, selectedSubcategory, itemsPerPage]);
+  }, [currentPage, selectedCategory, selectedSubcategory, itemsPerPage, isAuthenticated]);
 
   // Extrair categorias e subcategorias únicas dos produtos
   const allCategories = useMemo(() => {
@@ -68,6 +88,32 @@ export const Products = () => {
   }, [products, selectedCategory]);
 
   const totalPages = Math.ceil(totalProducts / itemsPerPage);
+
+  const handleFavoriteToggle = async (productId: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!isAuthenticated) {
+      setIsLoginModalOpen(true);
+      return;
+    }
+
+    try {
+      if (favorites.has(productId)) {
+        await favoritesApi.remove(productId);
+        setFavorites(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(productId);
+          return newSet;
+        });
+      } else {
+        await favoritesApi.add(productId);
+        setFavorites(prev => new Set(prev).add(productId));
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar favoritos:', error);
+    }
+  };
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategory(category);
@@ -199,44 +245,61 @@ export const Products = () => {
             className={styles.grid}
           >
             {products.map((product) => (
-              <Link to={`/produto/${product.id}`} key={product.id} className={styles.cardLink}>
-                <motion.div
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  whileHover={{ y: -5 }}
-                  className={styles.card}
-                >
-                  {/* Badge de destaque */}
-                  {product.is_featured && (
-                    <div className={styles.featuredBadge}>⭐ Destaque</div>
-                  )}
-                  
-                  <div className={styles.cardImageWrapper}>
-                    <img src={product.image_url || '/placeholder.jpg'} alt={product.name} loading="lazy" />
-                  </div>
-                  <div className={styles.cardInfo}>
-                    <span className={styles.categoryTag}>{product.category}</span>
-                    {product.subcategory && (
-                      <span 
-                        className={styles.subcategoryTag}
-                        style={{
-                          backgroundColor: getSubcategoryColor(product.subcategory).bg,
-                          color: getSubcategoryColor(product.subcategory).text,
-                        }}
-                      >
-                        {product.subcategory}
-                      </span>
+              <div key={product.id} className={styles.cardWrapper}>
+                <Link to={`/produto/${product.id}`} className={styles.cardLink}>
+                  <motion.div
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    whileHover={{ y: -5 }}
+                    className={styles.card}
+                  >
+                    {/* Badge de destaque */}
+                    {product.is_featured && (
+                      <div className={styles.featuredBadge}>⭐ Destaque</div>
                     )}
-                    <h3>{product.name}</h3>
-                    <div className={styles.cardFooter}>
-                      <span className={styles.price}>R$ {Number(product.price || 0).toFixed(2)}</span>
-                      <span className={styles.viewBtn}>Ver Detalhes</span>
+                    
+                    <div className={styles.cardImageWrapper}>
+                      <img src={product.image_url || '/placeholder.jpg'} alt={product.name} loading="lazy" />
                     </div>
-                  </div>
-                </motion.div>
-              </Link>
+                    <div className={styles.cardInfo}>
+                      <span className={styles.categoryTag}>{product.category}</span>
+                      {product.subcategory && (
+                        <span 
+                          className={styles.subcategoryTag}
+                          style={{
+                            backgroundColor: getSubcategoryColor(product.subcategory).bg,
+                            color: getSubcategoryColor(product.subcategory).text,
+                          }}
+                        >
+                          {product.subcategory}
+                        </span>
+                      )}
+                      <h3>{product.name}</h3>
+                      <div className={styles.cardFooter}>
+                        <span className={styles.price}>R$ {Number(product.price || 0).toFixed(2)}</span>
+                        <span className={styles.viewBtn}>Ver Detalhes</span>
+                      </div>
+                    </div>
+                    
+                    {/* Botão de favorito no footer */}
+                    <div className={styles.cardActions}>
+                      <button
+                        className={`${styles.favoriteBtn} ${favorites.has(product.id) ? styles.favoriteActive : ''}`}
+                        onClick={(e) => handleFavoriteToggle(product.id, e)}
+                        title={favorites.has(product.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                        aria-label={favorites.has(product.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                      >
+                        <IconHeart
+                          size={24}
+                          fill={favorites.has(product.id) ? 'currentColor' : 'none'}
+                        />
+                      </button>
+                    </div>
+                  </motion.div>
+                </Link>
+              </div>
             ))}
           </motion.div>
 
@@ -283,6 +346,26 @@ export const Products = () => {
           <p>Não há produtos disponíveis {selectedCategory !== 'Todos' ? `na categoria "${selectedCategory}"` : 'no momento'}.</p>
         </div>
       )}
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onSwitchToRegister={() => {
+          setIsLoginModalOpen(false);
+          setIsRegisterModalOpen(true);
+        }}
+      />
+
+      {/* Register Modal */}
+      <RegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        onSwitchToLogin={() => {
+          setIsRegisterModalOpen(false);
+          setIsLoginModalOpen(true);
+        }}
+      />
     </div>
   );
 };

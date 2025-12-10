@@ -18,6 +18,7 @@ export const ProductDetails = () => {
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [isFullScreenImage, setIsFullScreenImage] = useState(false);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -126,6 +127,9 @@ export const ProductDetails = () => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5, delay: 0.1 }}
+          onClick={() => setIsFullScreenImage(true)}
+          style={{ cursor: 'pointer' }}
+          title="Clique para ver em tela cheia"
         >
           <img
             src={product.image_url || '/placeholder.jpg'}
@@ -184,6 +188,21 @@ export const ProductDetails = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* Modal de imagem em tela cheia */}
+      {isFullScreenImage && (
+        <div className={styles.fullScreenOverlay} onClick={() => setIsFullScreenImage(false)}>
+          <button className={styles.closeButton} onClick={() => setIsFullScreenImage(false)}>
+            ✕
+          </button>
+          <img
+            src={product.image_url || '/placeholder.jpg'}
+            alt={product.name}
+            className={styles.fullScreenImage}
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
 
       {/* Login Modal */}
       <LoginModal

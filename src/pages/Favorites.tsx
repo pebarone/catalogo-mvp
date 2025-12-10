@@ -174,7 +174,7 @@ export const Favorites = () => {
                     className={styles.favoriteBtn}
                     aria-label="Remover dos favoritos"
                   >
-                    <IconHeartFilled size={24} color="#c62828" />
+                    <IconHeartFilled size={28} color="#c62828" />
                   </button>
                 </div>
               </div>
