@@ -90,3 +90,43 @@
   padding: 0.5rem 1rem;
   border-radius: 20px;
 }
+
+/* Mobile responsivo */
+@media (max-width: 768px) {
+  .page {
+    padding: 1rem;
+  }
+
+  .card {
+    padding: 2rem 1.5rem;
+  }
+
+  .card h1 {
+    font-size: 2rem;
+  }
+
+  .linkItem {
+    gap: 1rem;
+    padding: 0.8rem;
+  }
+
+  .iconBox {
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+  }
+
+  .linkItem h3 {
+    font-size: 0.95rem;
+  }
+
+  .linkItem p {
+    font-size: 0.85rem;
+    word-break: break-word;
+  }
+
+  .linkItem div {
+    min-width: 0;
+    flex: 1;
+  }
+}
