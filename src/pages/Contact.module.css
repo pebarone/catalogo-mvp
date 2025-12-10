@@ -58,11 +58,14 @@
 .iconBox {
   width: 50px;
   height: 50px;
+  min-width: 50px;
+  min-height: 50px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
+  flex-shrink: 0;
 }
 
 .insta { background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%,#d6249f 60%,#285AEB 90%); }
@@ -99,6 +102,7 @@
 
   .card {
     padding: 2rem 1.5rem;
+    overflow: hidden;
   }
 
   .card h1 {
@@ -107,13 +111,14 @@
 
   .linkItem {
     gap: 1rem;
-    padding: 0.8rem;
+    padding: 1rem;
   }
 
   .iconBox {
-    width: 45px;
-    height: 45px;
-    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
   }
 
   .linkItem h3 {
@@ -125,8 +130,63 @@
     word-break: break-word;
   }
 
-  .linkItem div {
+  .linkItem div:last-child {
     min-width: 0;
     flex: 1;
+  }
+}
+
+/* Telas muito pequenas */
+@media (max-width: 480px) {
+  .page {
+    padding: 0.75rem;
+  }
+
+  .card {
+    padding: 1.5rem 1rem;
+  }
+
+  .card h1 {
+    font-size: 1.75rem;
+  }
+
+  .subtitle {
+    font-size: 0.9rem;
+    margin-bottom: 2rem;
+  }
+
+  .links {
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .linkItem {
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .iconBox {
+    width: 35px;
+    height: 35px;
+    min-width: 35px;
+    min-height: 35px;
+  }
+
+  .iconBox svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .linkItem h3 {
+    font-size: 0.9rem;
+  }
+
+  .linkItem p {
+    font-size: 0.8rem;
+  }
+
+  .location {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
   }
 }
