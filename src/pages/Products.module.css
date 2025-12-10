@@ -209,3 +209,207 @@
   color: #666;
   font-size: 1rem;
 }
+
+/* Contador de produtos */
+.productsCount {
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  color: #999;
+  font-weight: 500;
+}
+
+/* Subcategorias */
+.subcategories {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.subButton {
+  padding: 0.4rem 1rem;
+  border-radius: 30px;
+  background: var(--color-blue-light);
+  border: 2px solid transparent;
+  color: var(--color-blue);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.subButton:hover {
+  background: var(--color-blue);
+  color: white;
+}
+
+.subButton.active {
+  background: var(--color-blue);
+  color: white;
+  box-shadow: 0 4px 10px rgba(25, 130, 196, 0.3);
+}
+
+.subcategoryTag {
+  display: inline-block;
+  background: var(--color-orange-light);
+  color: var(--color-orange);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+/* Controles */
+.controls {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.itemsPerPageSelector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  color: #666;
+}
+
+.itemsPerPageSelector label {
+  font-weight: 600;
+}
+
+.itemsPerPageSelector select {
+  padding: 0.4rem 0.8rem;
+  border: 2px solid #eee;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: white;
+  color: #333;
+  transition: border-color 0.3s;
+}
+
+.itemsPerPageSelector select:hover {
+  border-color: var(--color-blue);
+}
+
+.itemsPerPageSelector select:focus {
+  outline: none;
+  border-color: var(--color-blue);
+  box-shadow: 0 0 0 3px rgba(25, 130, 196, 0.1);
+}
+
+/* Badge de destaque */
+.featuredBadge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: linear-gradient(135deg, #FFD700, #FFA500);
+  color: #333;
+  padding: 0.4rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  z-index: 5;
+  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
+}
+
+/* Paginação */
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 3rem;
+  padding: 2rem 0;
+}
+
+.pageBtn {
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 2px solid #eee;
+  border-radius: 12px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pageBtn:hover:not(:disabled) {
+  background: var(--color-blue);
+  color: white;
+  border-color: var(--color-blue);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(25, 130, 196, 0.2);
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pageNumbers {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.pageNumber {
+  min-width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  border: 2px solid #eee;
+  border-radius: 10px;
+  font-weight: 600;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.pageNumber:hover {
+  background: var(--color-blue-light);
+  border-color: var(--color-blue);
+  color: var(--color-blue);
+}
+
+.pageNumber.active {
+  background: var(--color-blue);
+  color: white;
+  border-color: var(--color-blue);
+  box-shadow: 0 5px 15px rgba(25, 130, 196, 0.3);
+}
+
+.pageDots {
+  color: #999;
+  padding: 0 0.5rem;
+  font-weight: 700;
+}
+
+/* Mobile responsivo */
+@media (max-width: 768px) {
+  .pagination {
+    gap: 0.5rem;
+  }
+
+  .pageBtn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .pageNumber {
+    min-width: 40px;
+    height: 40px;
+    font-size: 0.9rem;
+  }
+
+  .controls {
+    justify-content: center;
+  }
+}

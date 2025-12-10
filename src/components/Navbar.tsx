@@ -8,10 +8,12 @@ import {
   IconHome, 
   IconUser, 
   IconMail, 
-  IconDashboard 
+  IconDashboard,
+  IconHeart
 } from './Icons';
 import { useAuth } from '../contexts/AuthContext';
 import { LoginModal } from './LoginModal';
+import { RegisterModal } from './RegisterModal';
 import styles from './Navbar.module.css';
 
 const baseLinks = [
@@ -24,13 +26,16 @@ const baseLinks = [
 export const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const location = useLocation();
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
 
-  // Adicionar link de admin se o usuário for admin
-  const links = isAdmin
-    ? [...baseLinks, { path: '/admin', name: 'Admin', icon: <IconDashboard size={18} /> }]
-    : baseLinks;
+  // Adicionar link de favoritos se autenticado e link de admin se for admin
+  const links = [
+    ...baseLinks,
+    ...(isAuthenticated ? [{ path: '/favoritos', name: 'Favoritos', icon: <IconHeart size={18} color="#c62828" /> }] : []),
+    ...(isAdmin ? [{ path: '/admin', name: 'Admin', icon: <IconDashboard size={18} /> }] : [])
+  ];
 
   const handleLogout = () => {
     logout();
@@ -148,6 +153,20 @@ export const Navbar = () => {
       <LoginModal
         isOpen={isLoginModalOpen}
         onClose={() => setIsLoginModalOpen(false)}
+        onSwitchToRegister={() => {
+          setIsLoginModalOpen(false);
+          setIsRegisterModalOpen(true);
+        }}
+      />
+
+      {/* Register Modal */}
+      <RegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        onSwitchToLogin={() => {
+          setIsRegisterModalOpen(false);
+          setIsLoginModalOpen(true);
+        }}
       />
     </>
   );

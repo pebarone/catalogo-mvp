@@ -1,0 +1,1068 @@
+openapi: 3.0.0
+info:
+  title: Catálogo MVP API
+  version: 2.0.0
+  description: |
+    API RESTful para gerenciamento de catálogo de produtos, incluindo:
+    - Autenticação e autorização com JWT
+    - Gerenciamento de produtos com imagens
+    - Sistema de favoritos para usuários
+    - Paginação e filtros avançados
+    - Subcategorias de produtos
+  contact:
+    name: Suporte API
+    
+servers:
+  - url: http://localhost:3000
+    description: Servidor de desenvolvimento
+  - url: https://cat-logo-mvp-backend.onrender.com
+    description: Servidor de produção
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token JWT obtido através do endpoint de login
+      
+  schemas:
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único do produto
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          description: Nome do produto
+          example: "Chaveiro Personalizado"
+        price:
+          type: number
+          format: float
+          description: Preço do produto
+          example: 15.99
+        category:
+          type: string
+          description: Categoria principal do produto
+          example: "Chaveiros"
+        subcategory:
+          type: string
+          nullable: true
+          description: Subcategoria do produto (opcional)
+          example: "Disney"
+        image_url:
+          type: string
+          nullable: true
+          description: URL da imagem do produto
+          example: "https://storage.supabase.co/melcolorindo_bucket/123456.jpg"
+        is_featured:
+          type: boolean
+          description: Indica se o produto está em destaque
+          example: false
+        created_at:
+          type: string
+          format: date-time
+          description: Data de criação do produto
+          example: "2025-12-09T10:30:00Z"
+          
+    ProductList:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        total:
+          type: integer
+          description: Total de produtos disponíveis
+          example: 150
+        page:
+          type: integer
+          description: Página atual
+          example: 1
+        maxResults:
+          type: integer
+          description: Máximo de resultados por página
+          example: 20
+          
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único do usuário
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        email:
+          type: string
+          format: email
+          description: Email do usuário
+          example: "admin@exemplo.com"
+        role:
+          type: string
+          description: Papel do usuário no sistema
+          enum: [user, admin]
+          example: "admin"
+        created_at:
+          type: string
+          format: date-time
+          description: Data de criação do usuário
+          example: "2025-12-01T08:00:00Z"
+          
+    UserList:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        total:
+          type: integer
+          description: Total de usuários no sistema
+          example: 50
+        page:
+          type: integer
+          description: Página atual
+          example: 1
+        maxResults:
+          type: integer
+          description: Máximo de resultados por página
+          example: 20
+          
+    Favorite:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID único do favorito
+          example: "123e4567-e89b-12d3-a456-426614174002"
+        user_id:
+          type: string
+          format: uuid
+          description: ID do usuário
+          example: "123e4567-e89b-12d3-a456-426614174001"
+        product_id:
+          type: string
+          format: uuid
+          description: ID do produto
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        created_at:
+          type: string
+          format: date-time
+          description: Data em que foi adicionado aos favoritos
+          example: "2025-12-09T10:30:00Z"
+          
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Mensagem de erro
+          example: "Produto não encontrado"
+
+paths:
+  # ==================== AUTENTICAÇÃO ====================
+  /auth/register:
+    post:
+      tags:
+        - Autenticação
+      summary: Registrar novo usuário
+      description: Cria uma nova conta de usuário no sistema
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: Email do usuário
+                  example: "usuario@exemplo.com"
+                password:
+                  type: string
+                  minLength: 6
+                  description: Senha (mínimo 6 caracteres)
+                  example: "senha123"
+      responses:
+        "201":
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Usuário criado com sucesso"
+                  user:
+                    $ref: "#/components/schemas/User"
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Email e senha são obrigatórios"
+        "409":
+          description: Usuário já existe
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Usuário já existe"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/login:
+    post:
+      tags:
+        - Autenticação
+      summary: Login de usuário
+      description: Autentica um usuário e retorna um token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: "admin@exemplo.com"
+                password:
+                  type: string
+                  example: "senha123"
+      responses:
+        "200":
+          description: Login bem-sucedido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: Token JWT para autenticação
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Email e senha são obrigatórios"
+        "401":
+          description: Credenciais inválidas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Credenciais inválidas"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ==================== PRODUTOS ====================
+  /products:
+    get:
+      tags:
+        - Produtos
+      summary: Listar produtos com paginação e filtros
+      description: |
+        Retorna uma lista paginada de produtos. Suporta filtros por categoria e subcategoria.
+        
+        **Exemplos de uso:**
+        - `/products` - Todos os produtos
+        - `/products?maxResults=10` - Primeiros 10 produtos
+        - `/products?maxResults=10&page=2` - Produtos 11-20
+        - `/products?category=Chaveiros` - Filtrar por categoria
+        - `/products?category=Chaveiros&subcategory=Disney` - Filtrar por categoria e subcategoria
+      parameters:
+        - in: query
+          name: maxResults
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Número máximo de resultados por página
+          example: 20
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: Número da página (começa em 1)
+          example: 1
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Filtrar por categoria
+          example: "Chaveiros"
+        - in: query
+          name: subcategory
+          schema:
+            type: string
+          description: Filtrar por subcategoria
+          example: "Disney"
+      responses:
+        "200":
+          description: Lista de produtos retornada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductList"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+                
+    post:
+      tags:
+        - Produtos
+      summary: Criar novo produto (Admin)
+      description: Cria um novo produto no catálogo. Requer autenticação de administrador.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - name
+                - price
+                - category
+              properties:
+                name:
+                  type: string
+                  description: Nome do produto
+                  example: "Chaveiro Mickey Mouse"
+                price:
+                  type: number
+                  format: float
+                  description: Preço do produto
+                  example: 15.99
+                category:
+                  type: string
+                  description: Categoria principal do produto
+                  example: "Chaveiros"
+                subcategory:
+                  type: string
+                  description: Subcategoria do produto (opcional)
+                  example: "Disney"
+                image:
+                  type: string
+                  format: binary
+                  description: Imagem do produto (opcional)
+      responses:
+        "201":
+          description: Produto criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Nome, preço e categoria são obrigatórios"
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Token não fornecido"
+        "403":
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Acesso negado: permissão insuficiente"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/featured:
+    get:
+      tags:
+        - Produtos
+      summary: Listar produtos em destaque
+      description: |
+        Retorna até 6 produtos marcados como destaque da semana.
+        **Importante:** O frontend deve exibir estes produtos em um carrossel na página inicial.
+      responses:
+        "200":
+          description: Lista de produtos em destaque
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+                maxItems: 6
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{id}:
+    get:
+      tags:
+        - Produtos
+      summary: Buscar produto por ID
+      description: Retorna os detalhes de um produto específico
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do produto
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Produto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Produto não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Produto não encontrado"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+                
+    put:
+      tags:
+        - Produtos
+      summary: Atualizar produto (Admin)
+      description: Atualiza os dados de um produto existente. Requer autenticação de administrador.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do produto
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: Nome do produto
+                  example: "Chaveiro Mickey Mouse Atualizado"
+                price:
+                  type: number
+                  format: float
+                  description: Preço do produto
+                  example: 19.99
+                category:
+                  type: string
+                  description: Categoria principal do produto
+                  example: "Chaveiros"
+                subcategory:
+                  type: string
+                  description: Subcategoria do produto
+                  example: "Disney"
+                image:
+                  type: string
+                  format: binary
+                  description: Nova imagem do produto (opcional)
+      responses:
+        "200":
+          description: Produto atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Produto não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Produto não encontrado"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+                
+    delete:
+      tags:
+        - Produtos
+      summary: Deletar produto (Admin)
+      description: |
+        Remove um produto do catálogo. Requer autenticação de administrador.
+        **IMPORTANTE:** A imagem associada ao produto também será deletada do Supabase Storage.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do produto
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "204":
+          description: Produto deletado com sucesso (sem conteúdo)
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Produto não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Produto não encontrado"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{id}/featured:
+    patch:
+      tags:
+        - Produtos
+      summary: Marcar/desmarcar produto como destaque (Admin)
+      description: |
+        Adiciona ou remove um produto da lista de destaques da semana.
+        **IMPORTANTE:** Máximo de 6 produtos em destaque permitidos.
+        Se tentar adicionar mais de 6, retornará erro 400 com código `FEATURED_LIMIT_REACHED`.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do produto
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - isFeatured
+              properties:
+                isFeatured:
+                  type: boolean
+                  description: True para marcar como destaque, false para remover
+                  example: true
+      responses:
+        "200":
+          description: Produto atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          description: Limite de produtos em destaque atingido ou dados inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Limite de produtos em destaque atingido"
+                  message:
+                    type: string
+                    example: "Você já possui 6 produtos em destaque. Remova um produto da lista de destaques antes de adicionar outro."
+                  code:
+                    type: string
+                    example: "FEATURED_LIMIT_REACHED"
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Produto não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Produto não encontrado"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ==================== USUÁRIOS ====================
+  /users:
+    get:
+      tags:
+        - Usuários
+      summary: Listar usuários com paginação (Admin)
+      description: |
+        Retorna uma lista paginada de usuários. Requer autenticação de administrador.
+        
+        **Exemplos de uso:**
+        - `/users` - Todos os usuários
+        - `/users?maxResults=10` - Primeiros 10 usuários
+        - `/users?maxResults=10&page=2` - Usuários 11-20
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: maxResults
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+          description: Número máximo de resultados por página
+          example: 20
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+          description: Número da página (começa em 1)
+          example: 1
+      responses:
+        "200":
+          description: Lista de usuários retornada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserList"
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Acesso negado: permissão insuficiente"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /users/{id}:
+    get:
+      tags:
+        - Usuários
+      summary: Buscar usuário por ID (Admin)
+      description: Retorna os detalhes de um usuário específico. Requer autenticação de administrador.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do usuário
+          example: "123e4567-e89b-12d3-a456-426614174001"
+      responses:
+        "200":
+          description: Usuário encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Acesso negado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Usuário não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Usuário não encontrado"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ==================== FAVORITOS ====================
+  /favorites:
+    get:
+      tags:
+        - Favoritos
+      summary: Listar favoritos do usuário
+      description: Retorna todos os produtos favoritos do usuário autenticado
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de produtos favoritos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+                
+    post:
+      tags:
+        - Favoritos
+      summary: Adicionar produto aos favoritos
+      description: Adiciona um produto à lista de favoritos do usuário
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productId
+              properties:
+                productId:
+                  type: string
+                  format: uuid
+                  description: ID do produto a ser adicionado
+                  example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "201":
+          description: Produto adicionado aos favoritos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Produto adicionado aos favoritos"
+                  favorite:
+                    $ref: "#/components/schemas/Favorite"
+        "400":
+          description: ID do produto não fornecido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "ID do produto é obrigatório"
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Produto não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Produto não encontrado"
+        "409":
+          description: Produto já está nos favoritos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Produto já está nos favoritos"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+                
+    delete:
+      tags:
+        - Favoritos
+      summary: Limpar todos os favoritos
+      description: Remove todos os produtos da lista de favoritos do usuário
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Favoritos removidos com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Todos os favoritos foram removidos"
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /favorites/count:
+    get:
+      tags:
+        - Favoritos
+      summary: Contar favoritos
+      description: Retorna a quantidade de produtos favoritos do usuário
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Contagem de favoritos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                    description: Número de produtos favoritos
+                    example: 5
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /favorites/check/{productId}:
+    get:
+      tags:
+        - Favoritos
+      summary: Verificar se produto está nos favoritos
+      description: Verifica se um produto específico está na lista de favoritos do usuário
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do produto a verificar
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Status do favorito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isFavorite:
+                    type: boolean
+                    description: True se o produto está nos favoritos
+                    example: true
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /favorites/{productId}:
+    delete:
+      tags:
+        - Favoritos
+      summary: Remover produto dos favoritos
+      description: Remove um produto específico da lista de favoritos do usuário
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID do produto a remover
+          example: "123e4567-e89b-12d3-a456-426614174000"
+      responses:
+        "200":
+          description: Produto removido dos favoritos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Produto removido dos favoritos"
+        "401":
+          description: Não autorizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: Favorito não encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Favorito não encontrado"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+tags:
+  - name: Autenticação
+    description: Endpoints para registro e login de usuários
+  - name: Produtos
+    description: Gerenciamento do catálogo de produtos
+  - name: Usuários
+    description: Gerenciamento de usuários (apenas admins)
+  - name: Favoritos
+    description: Gerenciamento de produtos favoritos do usuário

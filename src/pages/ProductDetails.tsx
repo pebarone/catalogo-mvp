@@ -4,6 +4,8 @@ import { motion } from 'framer-motion';
 import { productsApi, favoritesApi } from '../services/api';
 import type { Product } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { LoginModal } from '../components/LoginModal';
+import { RegisterModal } from '../components/RegisterModal';
 import { IconArrowLeft, IconHeart, IconWhatsapp, IconEdit } from '../components/Icons';
 import styles from './ProductDetails.module.css';
 
@@ -14,6 +16,8 @@ export const ProductDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -44,7 +48,13 @@ export const ProductDetails = () => {
   }, [id, isAuthenticated]);
 
   const handleFavoriteToggle = async () => {
-    if (!id || !isAuthenticated) return;
+    if (!id) return;
+
+    // Se não está autenticado, abre o modal de login
+    if (!isAuthenticated) {
+      setIsLoginModalOpen(true);
+      return;
+    }
 
     setIsFavoriteLoading(true);
     try {
@@ -144,20 +154,19 @@ export const ProductDetails = () => {
               Comprar via WhatsApp
             </a>
 
-            {isAuthenticated && (
-              <button
-                className={`${styles.wishlistButton} ${isFavorite ? styles.active : ''}`}
-                onClick={handleFavoriteToggle}
-                disabled={isFavoriteLoading}
-                aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-              >
-                <IconHeart
-                  size={24}
-                  fill={isFavorite ? 'currentColor' : 'none'}
-                  className={isFavoriteLoading ? styles.spinIcon : ''}
-                />
-              </button>
-            )}
+            <button
+              className={`${styles.wishlistButton} ${isFavorite ? styles.active : ''}`}
+              onClick={handleFavoriteToggle}
+              disabled={isFavoriteLoading}
+              aria-label={isFavorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+              title={!isAuthenticated ? 'Faça login para favoritar' : ''}
+            >
+              <IconHeart
+                size={24}
+                fill={isFavorite ? 'currentColor' : 'none'}
+                className={isFavoriteLoading ? styles.spinIcon : ''}
+              />
+            </button>
 
             {isAdmin && (
               <Link to="/admin" className={styles.adminButton}>
@@ -175,6 +184,26 @@ export const ProductDetails = () => {
           </div>
         </div>
       </motion.div>
+
+      {/* Login Modal */}
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
+        onSwitchToRegister={() => {
+          setIsLoginModalOpen(false);
+          setIsRegisterModalOpen(true);
+        }}
+      />
+
+      {/* Register Modal */}
+      <RegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+        onSwitchToLogin={() => {
+          setIsRegisterModalOpen(false);
+          setIsLoginModalOpen(true);
+        }}
+      />
     </div>
   );
 };

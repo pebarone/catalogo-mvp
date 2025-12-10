@@ -2,18 +2,22 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { IconMail, IconKey, IconEye, IconEyeOff, IconAlertCircle, IconLogin } from './Icons';
 import { useAuth } from '../contexts/AuthContext';
+import { isValidEmail } from '../services/api';
 import styles from './LoginModal.module.css';
 
 interface LoginModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSwitchToRegister?: () => void;
 }
 
-export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
+export const LoginModal = ({ isOpen, onClose, onSwitchToRegister }: LoginModalProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [touched, setTouched] = useState({ email: false, password: false });
   
   const { login, error, clearError } = useAuth();
 
@@ -23,6 +27,8 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       setEmail('');
       setPassword('');
       setShowPassword(false);
+      setEmailError('');
+      setTouched({ email: false, password: false });
       clearError();
     }
   }, [isOpen, clearError]);
@@ -53,6 +59,12 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validar email
+    if (!isValidEmail(email)) {
+      setEmailError('Por favor, insira um email válido');
+      return;
+    }
+    
     if (!email.trim() || !password.trim()) {
       return;
     }
@@ -66,6 +78,30 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
       // Erro já está sendo tratado no contexto
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    
+    // Validar em tempo real se campo já foi tocado
+    if (touched.email && value) {
+      if (!isValidEmail(value)) {
+        setEmailError('Email inválido');
+      } else {
+        setEmailError('');
+      }
+    }
+  };
+
+  const handleEmailBlur = () => {
+    setTouched(prev => ({ ...prev, email: true }));
+    
+    if (email && !isValidEmail(email)) {
+      setEmailError('Por favor, insira um email válido (exemplo@dominio.com)');
+    } else {
+      setEmailError('');
     }
   };
 
@@ -111,19 +147,30 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
             <form className={styles.form} onSubmit={handleSubmit}>
               <div className={styles.inputGroup}>
                 <label htmlFor="login-email">Email</label>
-                <div className={styles.inputWrapper}>
+                <div className={`${styles.inputWrapper} ${emailError && touched.email ? styles.error : ''}`}>
                   <IconMail size={18} color="#999" className={styles.inputIcon} />
                   <input
                     id="login-email"
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={handleEmailChange}
+                    onBlur={handleEmailBlur}
                     placeholder="seu@email.com"
                     autoComplete="email"
                     required
                     disabled={isSubmitting}
+                    className={emailError && touched.email ? styles.inputError : ''}
                   />
                 </div>
+                {emailError && touched.email && (
+                  <motion.span 
+                    className={styles.fieldError}
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                  >
+                    {emailError}
+                  </motion.span>
+                )}
               </div>
 
               <div className={styles.inputGroup}>
@@ -165,7 +212,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
               <button
                 type="submit"
                 className={styles.submitBtn}
-                disabled={isSubmitting || !email.trim() || !password.trim()}
+                disabled={isSubmitting || !email.trim() || !password.trim() || !!emailError}
               >
                 {isSubmitting ? (
                   <span className={styles.loading}>
@@ -179,7 +226,22 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
             </form>
 
             <div className={styles.footer}>
-              <p>Área restrita para administradores</p>
+              <p>
+                {onSwitchToRegister ? (
+                  <>
+                    Não tem uma conta?{' '}
+                    <button 
+                      type="button" 
+                      onClick={onSwitchToRegister}
+                      className={styles.switchLink}
+                    >
+                      Cadastre-se
+                    </button>
+                  </>
+                ) : (
+                  'Área restrita para administradores'
+                )}
+              </p>
             </div>
           </motion.div>
         </motion.div>

@@ -9,43 +9,16 @@ import {
   IconSearch, 
   IconEdit, 
   IconDelete, 
-  IconClose,
   IconUpload,
-  IconAlert,
-  IconCheck,
-  IconAlertCircle
+  IconAlert
 } from '../components/Icons';
 import { productsApi, ApiError } from '../services/api';
 import type { Product } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
+import { ToastContainer } from '../components/Toast';
+import { useToast } from '../hooks/useToast';
 import styles from './Admin.module.css';
-
-// Componente Toast para notificações
-interface ToastProps {
-  message: string;
-  type: 'success' | 'error';
-  onClose: () => void;
-}
-
-const Toast = ({ message, type, onClose }: ToastProps) => {
-  useEffect(() => {
-    const timer = setTimeout(onClose, 4000);
-    return () => clearTimeout(timer);
-  }, [onClose]);
-
-  return (
-    <motion.div
-      className={`${styles.toast} ${styles[type]}`}
-      initial={{ opacity: 0, y: 50, x: 50 }}
-      animate={{ opacity: 1, y: 0, x: 0 }}
-      exit={{ opacity: 0, y: 50 }}
-    >
-      {type === 'success' ? <IconCheck size={20} color="#8AC926" /> : <IconAlertCircle size={20} color="#FF595E" />}
-      <span>{message}</span>
-    </motion.div>
-  );
-};
 
 // Modal de produto (criar/editar)
 interface ProductModalProps {
@@ -59,24 +32,56 @@ const ProductModal = ({ isOpen, product, onClose, onSave }: ProductModalProps) =
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [category, setCategory] = useState('');
+  const [subcategory, setSubcategory] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [existingCategories, setExistingCategories] = useState<string[]>([]);
+  const [existingSubcategories, setExistingSubcategories] = useState<string[]>([]);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [showSubcategoryDropdown, setShowSubcategoryDropdown] = useState(false);
 
   useEffect(() => {
     if (product) {
       setName(product.name);
       setPrice(product.price.toString());
       setCategory(product.category);
+      setSubcategory(product.subcategory || '');
       setImagePreview(product.image_url);
     } else {
       setName('');
       setPrice('');
       setCategory('');
+      setSubcategory('');
       setImageFile(null);
       setImagePreview(null);
     }
   }, [product, isOpen]);
+
+  // Carregar categorias e subcategorias existentes
+  useEffect(() => {
+    const loadExistingData = async () => {
+      try {
+        const data = await productsApi.getAll({ maxResults: 1000 });
+        const categories = new Set<string>();
+        const subcategories = new Set<string>();
+        
+        data.products.forEach(p => {
+          if (p.category) categories.add(p.category);
+          if (p.subcategory) subcategories.add(p.subcategory);
+        });
+        
+        setExistingCategories(Array.from(categories).sort());
+        setExistingSubcategories(Array.from(subcategories).sort());
+      } catch (error) {
+        console.error('Erro ao carregar categorias:', error);
+      }
+    };
+    
+    if (isOpen) {
+      loadExistingData();
+    }
+  }, [isOpen]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -95,6 +100,9 @@ const ProductModal = ({ isOpen, product, onClose, onSave }: ProductModalProps) =
       formData.append('name', name);
       formData.append('price', price);
       formData.append('category', category);
+      if (subcategory.trim()) {
+        formData.append('subcategory', subcategory.trim());
+      }
       if (imageFile) {
         formData.append('image', imageFile);
       }
@@ -127,7 +135,7 @@ const ProductModal = ({ isOpen, product, onClose, onSave }: ProductModalProps) =
         <div className={styles.modalHeader}>
           <h2>{product ? 'Editar Produto' : 'Novo Produto'}</h2>
           <button className={styles.modalClose} onClick={onClose}>
-            <IconClose size={20} color="#666" />
+            <img src="/closeicon.svg" alt="Fechar" width={20} height={20} />
           </button>
         </div>
 
@@ -158,21 +166,61 @@ const ProductModal = ({ isOpen, product, onClose, onSave }: ProductModalProps) =
 
           <div className={styles.formGroup}>
             <label>Categoria</label>
-            <input
-              type="text"
-              value={category}
-              onChange={(e) => setCategory(e.target.value)}
-              placeholder="Ex: Pulseiras"
-              required
-              list="categories-list"
-            />
-            <datalist id="categories-list">
-              <option value="Pulseiras" />
-              <option value="Colares" />
-              <option value="Chaveiros" />
-              <option value="Tiaras" />
-              <option value="Acessórios" />
-            </datalist>
+            <div className={styles.customSelect}>
+              <input
+                type="text"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                onFocus={() => setShowCategoryDropdown(true)}
+                onBlur={() => setTimeout(() => setShowCategoryDropdown(false), 200)}
+                placeholder="Selecione ou digite uma categoria"
+                required
+              />
+              {showCategoryDropdown && existingCategories.length > 0 && (
+                <div className={styles.dropdown}>
+                  {existingCategories
+                    .filter(cat => cat.toLowerCase().includes(category.toLowerCase()))
+                    .map(cat => (
+                      <div
+                        key={cat}
+                        className={styles.dropdownItem}
+                        onMouseDown={() => setCategory(cat)}
+                      >
+                        {cat}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className={styles.formGroup}>
+            <label>Subcategoria (Opcional)</label>
+            <div className={styles.customSelect}>
+              <input
+                type="text"
+                value={subcategory}
+                onChange={(e) => setSubcategory(e.target.value)}
+                onFocus={() => setShowSubcategoryDropdown(true)}
+                onBlur={() => setTimeout(() => setShowSubcategoryDropdown(false), 200)}
+                placeholder="Selecione ou digite uma subcategoria"
+              />
+              {showSubcategoryDropdown && existingSubcategories.length > 0 && (
+                <div className={styles.dropdown}>
+                  {existingSubcategories
+                    .filter(sub => sub.toLowerCase().includes(subcategory.toLowerCase()))
+                    .map(sub => (
+                      <div
+                        key={sub}
+                        className={styles.dropdownItem}
+                        onMouseDown={() => setSubcategory(sub)}
+                      >
+                        {sub}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
           </div>
 
           <div className={styles.formGroup}>
@@ -188,7 +236,7 @@ const ProductModal = ({ isOpen, product, onClose, onSave }: ProductModalProps) =
                     setImagePreview(null);
                   }}
                 >
-                  <IconClose size={16} color="white" />
+                  <img src="/closeicon.svg" alt="Remover" width={16} height={16} />
                 </button>
               </div>
             ) : (
@@ -275,7 +323,7 @@ export const Admin = () => {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [deleteProduct, setDeleteProduct] = useState<Product | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const toast = useToast();
 
   // Redirecionar se não for admin
   if (!isAuthenticated || !isAdmin) {
@@ -287,15 +335,15 @@ export const Admin = () => {
     try {
       setIsLoading(true);
       const data = await productsApi.getAll();
-      setProducts(data);
-      setFilteredProducts(data);
+      setProducts(data.products); // Atualizado para usar data.products
+      setFilteredProducts(data.products);
     } catch (err) {
       console.error('Erro ao carregar produtos:', err);
-      setToast({ message: 'Erro ao carregar produtos', type: 'error' });
+      toast.error('Erro ao carregar produtos');
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     loadProducts();
@@ -317,17 +365,17 @@ export const Admin = () => {
     try {
       if (isEdit && editingProduct) {
         await productsApi.update(editingProduct.id, formData);
-        setToast({ message: 'Produto atualizado com sucesso!', type: 'success' });
+        toast.success('Produto atualizado com sucesso!');
       } else {
         await productsApi.create(formData);
-        setToast({ message: 'Produto criado com sucesso!', type: 'success' });
+        toast.success('Produto criado com sucesso!');
       }
       loadProducts();
     } catch (err) {
       if (err instanceof ApiError) {
-        setToast({ message: err.message, type: 'error' });
+        toast.error(err.message);
       } else {
-        setToast({ message: 'Erro ao salvar produto', type: 'error' });
+        toast.error('Erro ao salvar produto');
       }
       throw err;
     }
@@ -340,22 +388,52 @@ export const Admin = () => {
     setIsDeleting(true);
     try {
       await productsApi.delete(deleteProduct.id);
-      setToast({ message: 'Produto excluído com sucesso!', type: 'success' });
+      toast.success('Produto excluído com sucesso! A imagem também foi removida do storage.');
       setDeleteProduct(null);
       loadProducts();
     } catch (err) {
       if (err instanceof ApiError) {
-        setToast({ message: err.message, type: 'error' });
+        toast.error(err.message);
       } else {
-        setToast({ message: 'Erro ao excluir produto', type: 'error' });
+        toast.error('Erro ao excluir produto');
       }
     } finally {
       setIsDeleting(false);
     }
   };
 
+  // Toggle produto em destaque
+  const handleToggleFeatured = async (product: Product) => {
+    const newFeaturedState = !product.is_featured;
+    
+    try {
+      await productsApi.toggleFeatured(product.id, newFeaturedState);
+      toast.success(
+        newFeaturedState 
+          ? 'Produto adicionado aos destaques!' 
+          : 'Produto removido dos destaques'
+      );
+      loadProducts();
+    } catch (err) {
+      if (err instanceof ApiError) {
+        // Tratamento especial para erro de limite de destaques
+        if (err.code === 'FEATURED_LIMIT_REACHED') {
+          toast.error(
+            'Limite de destaques atingido! Você já possui 6 produtos em destaque. Remova um produto antes de adicionar outro.',
+            7000 // 7 segundos para mensagem importante
+          );
+        } else {
+          toast.error(err.message);
+        }
+      } else {
+        toast.error('Erro ao alterar status de destaque');
+      }
+    }
+  };
+
   // Calcular estatísticas
   const uniqueCategories = new Set(products.map((p) => p.category)).size;
+  const featuredCount = products.filter(p => p.is_featured).length;
   const recentProducts = products
     .filter((p) => {
       if (!p.created_at) return false;
@@ -417,6 +495,16 @@ export const Admin = () => {
             <p>Adicionados esta semana</p>
           </div>
         </div>
+
+        <div className={styles.statCard}>
+          <div className={`${styles.statIcon} ${styles.featured}`}>
+            <span style={{ fontSize: '24px' }}>⭐</span>
+          </div>
+          <div className={styles.statInfo}>
+            <h3>{featuredCount}/6</h3>
+            <p>Produtos em Destaque</p>
+          </div>
+        </div>
       </div>
 
       {/* Products Table */}
@@ -468,6 +556,7 @@ export const Admin = () => {
                 <th>Produto</th>
                 <th>Categoria</th>
                 <th>Preço</th>
+                <th>Destaque</th>
                 <th>Ações</th>
               </tr>
             </thead>
@@ -483,7 +572,9 @@ export const Admin = () => {
                       />
                       <div className={styles.productInfo}>
                         <h4>{product.name}</h4>
-                        <p>ID: {product.id}</p>
+                        {product.subcategory && (
+                          <span className={styles.subcategoryBadge}>{product.subcategory}</span>
+                        )}
                       </div>
                     </div>
                   </td>
@@ -494,6 +585,16 @@ export const Admin = () => {
                     <span className={styles.price}>
                       R$ {Number(product.price || 0).toFixed(2)}
                     </span>
+                  </td>
+                  <td>
+                    <label className={styles.toggleSwitch}>
+                      <input
+                        type="checkbox"
+                        checked={product.is_featured || false}
+                        onChange={() => handleToggleFeatured(product)}
+                      />
+                      <span className={styles.slider}></span>
+                    </label>
                   </td>
                   <td>
                     <div className={styles.actions}>
@@ -550,16 +651,8 @@ export const Admin = () => {
         )}
       </AnimatePresence>
 
-      {/* Toast */}
-      <AnimatePresence>
-        {toast && (
-          <Toast
-            message={toast.message}
-            type={toast.type}
-            onClose={() => setToast(null)}
-          />
-        )}
-      </AnimatePresence>
+      {/* Toast Container */}
+      <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />
     </div>
   );
 };

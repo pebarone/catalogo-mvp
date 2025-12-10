@@ -6,6 +6,7 @@ import { ProductDetails } from './pages/ProductDetails';
 import { About } from './pages/About';
 import { Contact } from './pages/Contact';
 import { Admin } from './pages/Admin';
+import { Favorites } from './pages/Favorites';
 import { AuthProvider } from './contexts/AuthContext';
 import { useEffect } from 'react';
 
@@ -29,6 +30,7 @@ function App() {
             <Route index element={<Home />} />
             <Route path="produtos" element={<Products />} />
             <Route path="produto/:id" element={<ProductDetails />} />
+            <Route path="favoritos" element={<Favorites />} />
             <Route path="sobre" element={<About />} />
             <Route path="contato" element={<Contact />} />
             <Route path="admin" element={<Admin />} />

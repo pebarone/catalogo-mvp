@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { IconArrowRight } from '../components/Icons';
 import styles from './Home.module.css';
@@ -9,22 +9,66 @@ import type { Product } from '../services/api';
 export const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [itemsPerSlide, setItemsPerSlide] = useState(3); // Desktop: 3, Mobile: 1
+
+  // Detectar tamanho da tela para responsividade
+  useEffect(() => {
+    const handleResize = () => {
+      setItemsPerSlide(window.innerWidth < 768 ? 1 : 3);
+    };
+    
+    handleResize(); // Verificar no mount
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const loadFeaturedProducts = async () => {
       try {
-        const products = await productsApi.getAll();
-        setFeaturedProducts(products.slice(0, 3));
+        // Usar novo endpoint de produtos em destaque (máximo 6)
+        const products = await productsApi.getFeatured();
+        setFeaturedProducts(products);
       } catch (error) {
-        console.error('Erro ao carregar produtos:', error);
+        console.error('Erro ao carregar produtos em destaque:', error);
         setFeaturedProducts([]);
       } finally {
         setIsLoading(false);
       }
     };
 
-    loadProducts();
+    loadFeaturedProducts();
   }, []);
+
+  // Auto-play do carrossel (opcional)
+  useEffect(() => {
+    if (featuredProducts.length <= itemsPerSlide) return; // Não precisa de carousel
+
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => {
+        const maxSlides = Math.ceil(featuredProducts.length / itemsPerSlide);
+        return (prev + 1) % maxSlides;
+      });
+    }, 5000); // Muda a cada 5 segundos
+
+    return () => clearInterval(interval);
+  }, [featuredProducts.length, itemsPerSlide]);
+
+  const maxSlides = Math.ceil(featuredProducts.length / itemsPerSlide);
+  
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % maxSlides);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + maxSlides) % maxSlides);
+  };
+
+  const getCurrentProducts = () => {
+    const start = currentSlide * itemsPerSlide;
+    const end = start + itemsPerSlide;
+    return featuredProducts.slice(start, end);
+  };
 
   return (
     <div className={styles.home}>
@@ -74,17 +118,17 @@ export const Home = () => {
         </div>
       </section>
 
-      {/* Featured Section */}
+      {/* Featured Section - Carrossel de Destaques */}
       <section className={styles.featured}>
         <div className={styles.sectionHeader}>
           <h2>Destaques da Semana</h2>
           <Link to="/produtos" className={styles.seeAll}>Ver tudo</Link>
         </div>
         
-        <div className={styles.grid}>
-          {isLoading ? (
-            // Loading skeleton
-            [1, 2, 3].map((i) => (
+        {isLoading ? (
+          // Loading skeleton
+          <div className={styles.grid}>
+            {[1, 2, 3].map((i) => (
               <div key={i} className={styles.cardSkeleton}>
                 <div className={styles.skeletonImage}></div>
                 <div className={styles.skeletonContent}>
@@ -92,31 +136,83 @@ export const Home = () => {
                   <div className={styles.skeletonPrice}></div>
                 </div>
               </div>
-            ))
-          ) : featuredProducts.length > 0 ? (
-            featuredProducts.map((product) => (
-              <Link to={`/produto/${product.id}`} key={product.id} className={styles.cardLink}>
-                <motion.div 
-                  whileHover={{ y: -10 }}
-                  className={styles.card}
+            ))}
+          </div>
+        ) : featuredProducts.length > 0 ? (
+          <div className={styles.carouselContainer}>
+            {/* Botões de navegação - apenas se houver mais produtos que o visível */}
+            {maxSlides > 1 && (
+              <>
+                <button 
+                  className={`${styles.carouselBtn} ${styles.prevBtn}`}
+                  onClick={prevSlide}
+                  aria-label="Slide anterior"
                 >
-                  <div className={styles.cardImageWrapper}>
-                    <img src={product.image_url || '/placeholder.jpg'} alt={product.name} className={styles.cardImage} />
-                  </div>
-                  <div className={styles.cardContent}>
-                    <h3>{product.name}</h3>
-                    <p className={styles.price}>R$ {Number(product.price || 0).toFixed(2)}</p>
-                  </div>
-                </motion.div>
-              </Link>
-            ))
-          ) : (
-            <div className={styles.emptyState}>
-              <p>Nenhum produto disponível no momento.</p>
-              <Link to="/contato" className={styles.ctaButton}>Entre em Contato</Link>
+                  ‹
+                </button>
+                <button 
+                  className={`${styles.carouselBtn} ${styles.nextBtn}`}
+                  onClick={nextSlide}
+                  aria-label="Próximo slide"
+                >
+                  ›
+                </button>
+              </>
+            )}
+
+            {/* Grid responsivo com produtos */}
+            <div className={styles.grid}>
+              <AnimatePresence mode="wait">
+                {getCurrentProducts().map((product) => (
+                  <Link to={`/produto/${product.id}`} key={product.id} className={styles.cardLink}>
+                    <motion.div 
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      whileHover={{ y: -10 }}
+                      transition={{ duration: 0.3 }}
+                      className={styles.card}
+                    >
+                      <div className={styles.cardImageWrapper}>
+                        <img 
+                          src={product.image_url || '/placeholder.jpg'} 
+                          alt={product.name} 
+                          className={styles.cardImage} 
+                        />
+                      </div>
+                      <div className={styles.cardContent}>
+                        <h3>{product.name}</h3>
+                        {product.subcategory && (
+                          <span className={styles.subcategory}>{product.subcategory}</span>
+                        )}
+                        <p className={styles.price}>R$ {Number(product.price || 0).toFixed(2)}</p>
+                      </div>
+                    </motion.div>
+                  </Link>
+                ))}
+              </AnimatePresence>
             </div>
-          )}
-        </div>
+
+            {/* Indicadores de página */}
+            {maxSlides > 1 && (
+              <div className={styles.carouselIndicators}>
+                {Array.from({ length: maxSlides }).map((_, index) => (
+                  <button
+                    key={index}
+                    className={`${styles.indicator} ${currentSlide === index ? styles.active : ''}`}
+                    onClick={() => setCurrentSlide(index)}
+                    aria-label={`Ir para slide ${index + 1}`}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className={styles.emptyState}>
+            <p>Nenhum produto em destaque no momento.</p>
+            <Link to="/produtos" className={styles.ctaButton}>Ver Coleção Completa</Link>
+          </div>
+        )}
       </section>
     </div>
   );

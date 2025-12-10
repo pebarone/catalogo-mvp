@@ -10,6 +10,7 @@ interface AuthContextType {
   isAdmin: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<void>;
   logout: () => void;
   error: string | null;
   clearError: () => void;
@@ -150,6 +151,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
     }
   }, []);
 
+  const register = useCallback(async (email: string, password: string) => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await authApi.register(email, password);
+      
+      // Após registro bem-sucedido, fazer login automaticamente
+      await login(email, password);
+      
+    } catch (err) {
+      if (err instanceof ApiError) {
+        if (err.status === 400) {
+          setError('Email já cadastrado ou inválido');
+        } else {
+          setError(err.message || 'Erro ao criar conta');
+        }
+      } else {
+        setError('Erro de conexão. Verifique sua internet.');
+      }
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [login]);
+
   const logout = useCallback(() => {
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
@@ -168,6 +195,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     isAdmin,
     isLoading,
     login,
+    register,
     logout,
     error,
     clearError,

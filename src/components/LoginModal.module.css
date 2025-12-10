@@ -230,6 +230,38 @@
   flex-shrink: 0;
 }
 
+/* Email validation styles */
+.inputWrapper.error {
+  border-color: #c62828;
+}
+
+.inputWrapper.error .inputIcon {
+  color: #c62828;
+}
+
+.inputWrapper.error .inputIcon path,
+.inputWrapper.error .inputIcon circle,
+.inputWrapper.error .inputIcon line {
+  stroke: #c62828;
+}
+
+.inputError {
+  border-color: #c62828 !important;
+}
+
+.inputError:focus {
+  border-color: #c62828 !important;
+  box-shadow: 0 0 0 4px rgba(198, 40, 40, 0.1) !important;
+}
+
+.fieldError {
+  display: block;
+  color: #c62828;
+  font-size: 0.85rem;
+  margin-top: 0.4rem;
+  font-weight: 500;
+}
+
 .submitBtn {
   background: var(--rainbow-gradient);
   color: white;
@@ -343,6 +375,24 @@
 }
 
 .footer a:hover {
+  color: var(--color-indigo);
+  text-decoration: underline;
+}
+
+.switchLink {
+  background: none;
+  border: none;
+  color: var(--color-violet);
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 0.2s ease;
+  padding: 0;
+  font-size: inherit;
+  font-family: inherit;
+}
+
+.switchLink:hover {
   color: var(--color-indigo);
   text-decoration: underline;
 }
