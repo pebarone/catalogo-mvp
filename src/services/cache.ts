@@ -15,13 +15,14 @@ interface CacheConfig {
 }
 
 // Configurações de TTL (em minutos)
+// OTIMIZADO: TTLs maiores para reduzir chamadas API
 const DEFAULT_TTL: CacheConfig = {
-  products: 5,          // 5 minutos para produto individual
-  productList: 3,       // 3 minutos para lista de produtos
-  featuredProducts: 10, // 10 minutos para destaques (mudam menos)
-  favorites: 2,         // 2 minutos para favoritos (mudam frequentemente)
-  favoritesCount: 2,    // 2 minutos para contagem
-  usersList: 5,         // 5 minutos para lista de usuários
+  products: 30,         // 30 minutos para produto individual (produtos raramente mudam)
+  productList: 30,      // 30 minutos para lista de produtos
+  featuredProducts: 30, // 30 minutos para destaques (configuração estável)
+  favorites: 5,         // 5 minutos para favoritos (contexto global gerencia)
+  favoritesCount: 5,    // 5 minutos para contagem
+  usersList: 10,        // 10 minutos para lista de usuários (admin only)
 };
 
 class CacheService {

@@ -6,12 +6,14 @@ import styles from './Home.module.css';
 import { productsApi } from '../services/api';
 import type { Product } from '../services/api';
 import { getSubcategoryColor } from '../utils/subcategoryColors';
+import { useShouldReduceAnimations } from '../hooks/useIsMobile';
 
 export const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [itemsPerSlide, setItemsPerSlide] = useState(3); // Desktop: 3, Mobile: 1
+  const shouldReduceAnimations = useShouldReduceAnimations();
 
   // Detectar tamanho da tela para responsividade
   useEffect(() => {
@@ -70,9 +72,9 @@ export const Home = () => {
         <div className={styles.heroContent}>
 
           <motion.h1
-            initial={{ y: 50, opacity: 0 }}
+            initial={shouldReduceAnimations ? false : { y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
+            transition={shouldReduceAnimations ? { duration: 0 } : { delay: 0.2, duration: 0.8 }}
             className={styles.title}
           >
         Colorindo<br />
@@ -80,18 +82,18 @@ export const Home = () => {
           </motion.h1>
 
           <motion.p
-            initial={{ y: 30, opacity: 0 }}
+            initial={shouldReduceAnimations ? false : { y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.4 }}
+            transition={shouldReduceAnimations ? { duration: 0 } : { delay: 0.4 }}
             className={styles.subtitle}
           >
             Acessórios feitos à mão com muito amor e cor para alegrar o seu dia! 🌈
           </motion.p>
 
           <motion.div
-            initial={{ y: 30, opacity: 0 }}
+            initial={shouldReduceAnimations ? false : { y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6 }}
+            transition={shouldReduceAnimations ? { duration: 0 } : { delay: 0.6 }}
           >
             <Link to="/produtos" className={styles.ctaButton}>
               Ver Coleção <IconArrowRight size={20} />
@@ -107,6 +109,7 @@ export const Home = () => {
              src={"/produto3.jpg"} 
              alt="Acessórios Coloridos" 
              className={styles.heroImage}
+             decoding="async"
            />
         </div>
       </section>
@@ -139,18 +142,20 @@ export const Home = () => {
                 {getCurrentProducts().map((product) => (
                   <Link to={`/produto/${product.id}`} key={product.id} className={styles.cardLink}>
                     <motion.div 
-                      initial={{ opacity: 0, scale: 0.95 }}
+                      initial={shouldReduceAnimations ? false : { opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      whileHover={{ y: -10 }}
-                      transition={{ duration: 0.3 }}
+                      exit={shouldReduceAnimations ? undefined : { opacity: 0, scale: 0.95 }}
+                      whileHover={shouldReduceAnimations ? undefined : { y: -10 }}
+                      transition={{ duration: shouldReduceAnimations ? 0 : 0.3 }}
                       className={styles.card}
                     >
                       <div className={styles.cardImageWrapper}>
                         <img 
                           src={product.image_url || '/placeholder.jpg'} 
                           alt={product.name} 
-                          className={styles.cardImage} 
+                          className={styles.cardImage}
+                          loading="lazy"
+                          decoding="async"
                         />
                       </div>
                       <div className={styles.cardContent}>

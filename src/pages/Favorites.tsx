@@ -1,65 +1,41 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { favoritesApi, type Product } from '../services/api';
+import { useFavorites } from '../contexts/FavoritesContext';
+import { useShouldReduceAnimations } from '../hooks/useIsMobile';
 import { IconHeart, IconHeartFilled, IconAlertCircle } from '../components/Icons';
 import styles from './Favorites.module.css';
 import { getSubcategoryColor } from '../utils/subcategoryColors';
 
 export const Favorites = () => {
-  const [favorites, setFavorites] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    loadFavorites();
-  }, []);
-
-  const loadFavorites = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const data = await favoritesApi.getAll();
-      setFavorites(data);
-    } catch (err) {
-      setError('Erro ao carregar favoritos. Tente novamente.');
-      console.error('Erro ao carregar favoritos:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const toggleFavorite = async (productId: string) => {
-    try {
-      const isFavorite = favorites.some(fav => fav.id === productId);
-      
-      if (isFavorite) {
-        await favoritesApi.remove(productId);
-        setFavorites(prev => prev.filter(fav => fav.id !== productId));
-      } else {
-        await favoritesApi.add(productId);
-        // Não adiciona aqui pois não temos os dados completos do produto
-        // O usuário precisaria voltar para recarregar
-        loadFavorites();
-      }
-    } catch (err) {
-      console.error('Erro ao alternar favorito:', err);
-    }
-  };
+  const { 
+    favorites, 
+    isLoading, 
+    error, 
+    removeFavorite, 
+    refreshFavorites 
+  } = useFavorites();
+  const shouldReduceAnimations = useShouldReduceAnimations();
 
   const containerVariants = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
+        staggerChildren: shouldReduceAnimations ? 0 : 0.1
       }
     }
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 }
+  const itemVariants = shouldReduceAnimations 
+    ? { hidden: {}, show: {} }
+    : { hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } };
+
+  const handleRemoveFavorite = async (productId: string) => {
+    try {
+      await removeFavorite(productId);
+    } catch (err) {
+      console.error('Erro ao remover favorito:', err);
+    }
   };
 
   if (isLoading) {
@@ -79,7 +55,7 @@ export const Favorites = () => {
         <div className={styles.errorContainer}>
           <IconAlertCircle size={48} color="#c62828" />
           <p>{error}</p>
-          <button onClick={loadFavorites} className={styles.retryBtn}>
+          <button onClick={refreshFavorites} className={styles.retryBtn}>
             Tentar novamente
           </button>
         </div>
@@ -166,11 +142,11 @@ export const Favorites = () => {
                 </div>
 
                 <div className={styles.footer}>
-                  <Link to={`/products/${product.id}`} className={styles.detailsBtn}>
+                  <Link to={`/produto/${product.id}`} className={styles.detailsBtn}>
                     Ver Detalhes
                   </Link>
                   <button
-                    onClick={() => toggleFavorite(product.id)}
+                    onClick={() => handleRemoveFavorite(product.id)}
                     className={styles.favoriteBtn}
                     aria-label="Remover dos favoritos"
                   >

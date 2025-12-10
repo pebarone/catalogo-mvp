@@ -1,29 +1,33 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { productsApi, favoritesApi } from '../services/api';
+import { productsApi } from '../services/api';
 import type { Product } from '../services/api';
 import styles from './Products.module.css';
 import { getSubcategoryColor } from '../utils/subcategoryColors';
 import { useAuth } from '../contexts/AuthContext';
+import { useFavorites } from '../contexts/FavoritesContext';
+import { useShouldReduceAnimations } from '../hooks/useIsMobile';
 import { IconHeart } from '../components/Icons';
 import { LoginModal } from '../components/LoginModal';
 import { RegisterModal } from '../components/RegisterModal';
 
 export const Products = () => {
   const { isAuthenticated } = useAuth();
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const shouldReduceAnimations = useShouldReduceAnimations();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
-  const [favorites, setFavorites] = useState<Set<string>>(new Set());
+  const [sortBy, setSortBy] = useState<'default' | 'name-asc' | 'price-asc' | 'price-desc'>('default');
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [itemsPerPage, setItemsPerPage] = useState(6);
 
   useEffect(() => {
     const loadProducts = async () => {
@@ -45,18 +49,7 @@ export const Products = () => {
         const data = await productsApi.getAll(params);
         setProducts(data.products);
         setTotalProducts(data.total);
-
-        // Carregar favoritos se autenticado
-        if (isAuthenticated) {
-          try {
-            const favs = await favoritesApi.getAll();
-            setFavorites(new Set(favs.map((f: any) => f.product_id)));
-          } catch {
-            // Ignora erro de favoritos
-          }
-        } else {
-          setFavorites(new Set());
-        }
+        // Favoritos agora são gerenciados pelo FavoritesContext
       } catch (error) {
         console.error('Erro ao carregar produtos:', error);
         setProducts([]);
@@ -67,7 +60,7 @@ export const Products = () => {
     };
 
     loadProducts();
-  }, [currentPage, selectedCategory, selectedSubcategory, itemsPerPage, isAuthenticated]);
+  }, [currentPage, selectedCategory, selectedSubcategory, itemsPerPage]);
 
   // Extrair categorias e subcategorias únicas dos produtos
   const allCategories = useMemo(() => {
@@ -87,6 +80,35 @@ export const Products = () => {
     return Array.from(subs);
   }, [products, selectedCategory]);
 
+  // Ordenar produtos com destaques no topo por padrão
+  const sortedProducts = useMemo(() => {
+    const productsToSort = [...products];
+
+    if (sortBy === 'default') {
+      // Padrão: Destaques primeiro, depois ordem original
+      return productsToSort.sort((a, b) => {
+        if (a.is_featured && !b.is_featured) return -1;
+        if (!a.is_featured && b.is_featured) return 1;
+        return 0;
+      });
+    }
+
+    // Com filtro aplicado, ignora prioridade de destaque
+    if (sortBy === 'name-asc') {
+      return productsToSort.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    if (sortBy === 'price-asc') {
+      return productsToSort.sort((a, b) => (a.price || 0) - (b.price || 0));
+    }
+
+    if (sortBy === 'price-desc') {
+      return productsToSort.sort((a, b) => (b.price || 0) - (a.price || 0));
+    }
+
+    return productsToSort;
+  }, [products, sortBy]);
+
   const totalPages = Math.ceil(totalProducts / itemsPerPage);
 
   const handleFavoriteToggle = async (productId: string, event: React.MouseEvent) => {
@@ -99,17 +121,7 @@ export const Products = () => {
     }
 
     try {
-      if (favorites.has(productId)) {
-        await favoritesApi.remove(productId);
-        setFavorites(prev => {
-          const newSet = new Set(prev);
-          newSet.delete(productId);
-          return newSet;
-        });
-      } else {
-        await favoritesApi.add(productId);
-        setFavorites(prev => new Set(prev).add(productId));
-      }
+      await toggleFavorite(productId);
     } catch (error) {
       console.error('Erro ao atualizar favoritos:', error);
     }
@@ -216,11 +228,24 @@ export const Products = () => {
               setCurrentPage(1);
             }}
           >
+            <option value={6}>6</option>
             <option value={10}>10</option>
             <option value={20}>20</option>
-            <option value={50}>50</option>
           </select>
           <span>por página</span>
+        </div>
+
+        <div className={styles.sortSelector}>
+          <label>Ordenar por:</label>
+          <select 
+            value={sortBy} 
+            onChange={(e) => setSortBy(e.target.value as any)}
+          >
+            <option value="default">Destaques primeiro</option>
+            <option value="name-asc">Nome (A-Z)</option>
+            <option value="price-asc">Preço (menor)</option>
+            <option value="price-desc">Preço (maior)</option>
+          </select>
         </div>
       </div>
 
@@ -238,21 +263,21 @@ export const Products = () => {
             </div>
           ))}
         </div>
-      ) : products.length > 0 ? (
+      ) : sortedProducts.length > 0 ? (
         <>
           <motion.div 
-            layout
+            layout={!shouldReduceAnimations}
             className={styles.grid}
           >
-            {products.map((product) => (
+            {sortedProducts.map((product) => (
               <div key={product.id} className={styles.cardWrapper}>
                 <Link to={`/produto/${product.id}`} className={styles.cardLink}>
                   <motion.div
-                    layout
-                    initial={{ opacity: 0 }}
+                    layout={!shouldReduceAnimations}
+                    initial={shouldReduceAnimations ? false : { opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    whileHover={{ y: -5 }}
+                    exit={shouldReduceAnimations ? undefined : { opacity: 0 }}
+                    whileHover={shouldReduceAnimations ? undefined : { y: -5 }}
                     className={styles.card}
                   >
                     {/* Badge de destaque */}
@@ -261,7 +286,12 @@ export const Products = () => {
                     )}
                     
                     <div className={styles.cardImageWrapper}>
-                      <img src={product.image_url || '/placeholder.jpg'} alt={product.name} loading="lazy" />
+                      <img 
+                        src={product.image_url || '/placeholder.jpg'} 
+                        alt={product.name} 
+                        loading="lazy"
+                        decoding="async"
+                      />
                     </div>
                     <div className={styles.cardInfo}>
                       <span className={styles.categoryTag}>{product.category}</span>
@@ -286,14 +316,14 @@ export const Products = () => {
                     {/* Botão de favorito no footer */}
                     <div className={styles.cardActions}>
                       <button
-                        className={`${styles.favoriteBtn} ${favorites.has(product.id) ? styles.favoriteActive : ''}`}
+                        className={`${styles.favoriteBtn} ${isFavorite(product.id) ? styles.favoriteActive : ''}`}
                         onClick={(e) => handleFavoriteToggle(product.id, e)}
-                        title={favorites.has(product.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
-                        aria-label={favorites.has(product.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                        title={isFavorite(product.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                        aria-label={isFavorite(product.id) ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
                       >
                         <IconHeart
                           size={24}
-                          fill={favorites.has(product.id) ? 'currentColor' : 'none'}
+                          fill={isFavorite(product.id) ? 'currentColor' : 'none'}
                         />
                       </button>
                     </div>

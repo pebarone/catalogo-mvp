@@ -23,19 +23,55 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
 
-// Decodificar payload do JWT (sem verificar assinatura - isso é feito no backend)
+/**
+ * Decodifica payload do JWT de forma segura
+ * NOTA: Apenas decodifica, não valida a assinatura (backend é responsável)
+ * @param token - Token JWT
+ * @returns Payload decodificado ou null se inválido
+ */
 function decodeJwtPayload(token: string): Record<string, unknown> | null {
   try {
-    const base64Url = token.split('.')[1];
+    // Validação básica do formato JWT (3 partes separadas por ponto)
+    if (!token || typeof token !== 'string') {
+      return null;
+    }
+
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      console.warn('[Auth] Token JWT mal formado: número de partes inválido');
+      return null;
+    }
+
+    const base64Url = parts[1];
+    if (!base64Url || base64Url.length === 0) {
+      console.warn('[Auth] Token JWT mal formado: payload vazio');
+      return null;
+    }
+
+    // Substituir caracteres URL-safe
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    
+    // Adicionar padding se necessário
+    const padded = base64.padEnd(base64.length + (4 - base64.length % 4) % 4, '=');
+    
     const jsonPayload = decodeURIComponent(
-      atob(base64)
+      atob(padded)
         .split('')
         .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
         .join('')
     );
-    return JSON.parse(jsonPayload);
-  } catch {
+    
+    const payload = JSON.parse(jsonPayload);
+    
+    // Validação básica do payload
+    if (typeof payload !== 'object' || payload === null) {
+      console.warn('[Auth] Token JWT mal formado: payload não é um objeto');
+      return null;
+    }
+
+    return payload;
+  } catch (error) {
+    console.warn('[Auth] Erro ao decodificar token JWT:', error);
     return null;
   }
 }

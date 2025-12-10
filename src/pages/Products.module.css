@@ -321,12 +321,15 @@
 /* Controles */
 .controls {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.itemsPerPageSelector {
+.itemsPerPageSelector,
+.sortSelector {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -334,11 +337,13 @@
   color: #666;
 }
 
-.itemsPerPageSelector label {
+.itemsPerPageSelector label,
+.sortSelector label {
   font-weight: 600;
 }
 
-.itemsPerPageSelector select {
+.itemsPerPageSelector select,
+.sortSelector select {
   padding: 0.4rem 0.8rem;
   border: 2px solid #eee;
   border-radius: 8px;
@@ -350,11 +355,13 @@
   transition: border-color 0.3s;
 }
 
-.itemsPerPageSelector select:hover {
+.itemsPerPageSelector select:hover,
+.sortSelector select:hover {
   border-color: var(--color-blue);
 }
 
-.itemsPerPageSelector select:focus {
+.itemsPerPageSelector select:focus,
+.sortSelector select:focus {
   outline: none;
   border-color: var(--color-blue);
   box-shadow: 0 0 0 3px rgba(25, 130, 196, 0.1);
@@ -467,6 +474,13 @@
   }
 
   .controls {
+    justify-content: center;
+    flex-direction: column;
+  }
+
+  .itemsPerPageSelector,
+  .sortSelector {
+    width: 100%;
     justify-content: center;
   }
 }
