@@ -64,7 +64,7 @@ export const ProductDetails = () => {
 
   const generateWhatsAppLink = () => {
     if (!product) return '#';
-    const phone = '5511999999999'; // TODO: Configure o número de WhatsApp
+    const phone = '5511972969552';
     const message = encodeURIComponent(
       `Olá! Tenho interesse no produto: ${product.name} - R$ ${Number(product.price).toFixed(2)}`
     );
@@ -168,10 +168,10 @@ export const ProductDetails = () => {
           </div>
 
           <div className={styles.features}>
-            <div className={styles.featureItem}>✨ Feito à mão</div>
-            <div className={styles.featureItem}>🎨 Cores vibrantes</div>
-            <div className={styles.featureItem}>💖 Peça única</div>
-            <div className={styles.featureItem}>📦 Envio rápido</div>
+            <div className={styles.featureItem}>Feito à mão</div>
+            <div className={styles.featureItem}>Cores vibrantes</div>
+            <div className={styles.featureItem}>Peça única</div>
+            <div className={styles.featureItem}>Envio rápido</div>
           </div>
         </div>
       </motion.div>

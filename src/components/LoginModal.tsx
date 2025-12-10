@@ -97,7 +97,7 @@ export const LoginModal = ({ isOpen, onClose }: LoginModalProps) => {
               onClick={onClose}
               aria-label="Fechar modal"
             >
-              <IconClose size={24} color="#555" />
+              <img src="/closeicon.svg" alt="Fechar" width={24} height={24} />
             </button>
 
             <div className={styles.header}>

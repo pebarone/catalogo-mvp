@@ -67,7 +67,7 @@ export const Home = () => {
            <div className={styles.blob2}></div>
            <div className={styles.blob3}></div>
            <img 
-             src={featuredProducts[0]?.image_url || "/produto3.jpg"} 
+             src={"/produto3.jpg"} 
              alt="Acessórios Coloridos" 
              className={styles.heroImage}
            />

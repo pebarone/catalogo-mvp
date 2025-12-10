@@ -70,7 +70,7 @@ export const Navbar = () => {
                   <span className={styles.userEmail}>{user?.email}</span>
                 </div>
                 <button className={styles.authButton} onClick={handleLogout} title="Sair">
-                  <IconLogout size={18} color="#6A4C93" />
+                  <img src="/logout.svg" alt="Logout" width={18} height={18} />
                 </button>
               </div>
             ) : (
@@ -79,7 +79,7 @@ export const Navbar = () => {
                 onClick={() => setIsLoginModalOpen(true)}
                 title="Entrar"
               >
-                <IconLogin size={18} color="#6A4C93" />
+                <img src="/login.svg" alt="Login" width={18} height={18} />
               </button>
             )}
           </div>
@@ -124,7 +124,7 @@ export const Navbar = () => {
                       className={styles.mobileAuthButton}
                       onClick={handleLogout}
                     >
-                      <IconLogout size={18} color="white" />
+                      <img src="/logout.svg" alt="Logout" width={18} height={18} />
                       Sair
                     </button>
                   </>
@@ -136,7 +136,7 @@ export const Navbar = () => {
                       setIsLoginModalOpen(true);
                     }}
                   >
-                    <IconLogin size={18} color="white" />
+                    <img src="/login.svg" alt="Login" width={18} height={18} />
                     Entrar
                   </button>
                 )}

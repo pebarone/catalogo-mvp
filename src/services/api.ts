@@ -95,6 +95,14 @@ async function fetchApi<T>(
   return response.json();
 }
 
+// Helper para normalizar o objeto produto
+const normalizeProduct = (p: any): Product => {
+  return {
+    ...p,
+    id: p.id || p.uuid || p._id,
+  };
+};
+
 // ============ Auth API ============
 
 export const authApi = {
@@ -118,11 +126,26 @@ export const authApi = {
 
 export const productsApi = {
   getAll: async (): Promise<Product[]> => {
-    return fetchApi<Product[]>('/products');
+    const data = await fetchApi<any[]>('/products');
+    return data.map(normalizeProduct);
   },
 
   getById: async (id: string): Promise<Product> => {
-    return fetchApi<Product>(`/products/${id}`);
+    try {
+      const data = await fetchApi<any>(`/products/${id}`);
+      return normalizeProduct(data);
+    } catch (error) {
+      console.warn(`Falha ao buscar produto ${id} diretamente. Tentando encontrar na lista geral...`, error);
+      // Fallback: Busca todos e filtra
+      const allProducts = await productsApi.getAll();
+      const product = allProducts.find(p => p.id === id);
+      
+      if (product) {
+        return product;
+      }
+      
+      throw error;
+    }
   },
 
   create: async (formData: FormData): Promise<Product> => {
@@ -143,7 +166,8 @@ export const productsApi = {
       );
     }
 
-    return response.json();
+    const data = await response.json();
+    return normalizeProduct(data);
   },
 
   update: async (id: string, formData: FormData): Promise<Product> => {
@@ -164,7 +188,8 @@ export const productsApi = {
       );
     }
 
-    return response.json();
+    const data = await response.json();
+    return normalizeProduct(data);
   },
 
   delete: async (id: string): Promise<void> => {
