@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   IconDashboard, 
@@ -20,6 +21,7 @@ import { ToastContainer } from '../components/Toast';
 import { useToast } from '../hooks/useToast';
 import { getSubcategoryColor } from '../utils/subcategoryColors';
 import styles from './Admin.module.css';
+import modalStyles from '../components/LoginModal.module.css';
 
 // Modal de produto (criar/editar)
 interface ProductModalProps {
@@ -84,6 +86,29 @@ const ProductModal = ({ isOpen, product, onClose, onSave }: ProductModalProps) =
     }
   }, [isOpen]);
 
+  // Prevenir scroll do body quando modal aberto
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  // Fechar com ESC
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, [isOpen, onClose]);
+
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -117,11 +142,11 @@ const ProductModal = ({ isOpen, product, onClose, onSave }: ProductModalProps) =
     }
   };
 
-  return (
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className={styles.modalOverlay}
+          className={modalStyles.overlay}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -129,151 +154,180 @@ const ProductModal = ({ isOpen, product, onClose, onSave }: ProductModalProps) =
           onClick={(e) => e.target === e.currentTarget && onClose()}
         >
           <motion.div
-            className={styles.productModal}
+            className={modalStyles.modal}
             initial={{ scale: 0.95, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 20 }}
             transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           >
-            <div className={styles.modalHeader}>
-              <h2>{product ? 'Editar Produto' : 'Novo Produto'}</h2>
-              <button className={styles.modalClose} onClick={onClose}>
-                <img src="/closeicon.svg" alt="Fechar" width={20} height={20} />
-              </button>
-            </div>
+            <button
+              className={modalStyles.closeBtn}
+              onClick={onClose}
+              aria-label="Fechar modal"
+            >
+              <img src="/closeicon.svg" alt="Fechar" width={24} height={24} />
+            </button>
 
-            <form className={styles.modalForm} onSubmit={handleSubmit}>
-              <div className={styles.formGroup}>
-                <label>Nome do Produto</label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Ex: Pulseira Arco-Íris"
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Preço (R$)</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  placeholder="0.00"
-                  required
-                />
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Categoria</label>
-                <div className={styles.customSelect}>
-                  <input
-                    type="text"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    onFocus={() => setShowCategoryDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowCategoryDropdown(false), 200)}
-                    placeholder="Selecione ou digite uma categoria"
-                    required
-                  />
-                  {showCategoryDropdown && existingCategories.length > 0 && (
-                    <div className={styles.dropdown}>
-                      {existingCategories
-                        .filter(cat => cat.toLowerCase().includes(category.toLowerCase()))
-                        .map(cat => (
-                          <div
-                            key={cat}
-                            className={styles.dropdownItem}
-                            onMouseDown={() => setCategory(cat)}
-                          >
-                            {cat}
-                          </div>
-                        ))}
-                    </div>
-                  )}
+            <div className={modalStyles.modalContent}>
+              <div className={modalStyles.header}>
+                <div className={modalStyles.iconWrapper}>
+                  {product ? <IconEdit size={32} color="#6A4C93" /> : <IconAdd size={32} color="#6A4C93" />}
                 </div>
+                <h2>{product ? 'Editar Produto' : 'Novo Produto'}</h2>
+                <p>{product ? 'Atualize as informações do produto' : 'Preencha os dados para criar um novo produto'}</p>
               </div>
 
-              <div className={styles.formGroup}>
-                <label>Subcategoria (Opcional)</label>
-                <div className={styles.customSelect}>
-                  <input
-                    type="text"
-                    value={subcategory}
-                    onChange={(e) => setSubcategory(e.target.value)}
-                    onFocus={() => setShowSubcategoryDropdown(true)}
-                    onBlur={() => setTimeout(() => setShowSubcategoryDropdown(false), 200)}
-                    placeholder="Selecione ou digite uma subcategoria"
-                  />
-                  {showSubcategoryDropdown && existingSubcategories.length > 0 && (
-                    <div className={styles.dropdown}>
-                      {existingSubcategories
-                        .filter(sub => sub.toLowerCase().includes(subcategory.toLowerCase()))
-                        .map(sub => (
-                          <div
-                            key={sub}
-                            className={styles.dropdownItem}
-                            onMouseDown={() => setSubcategory(sub)}
-                          >
-                            {sub}
-                          </div>
-                        ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className={styles.formGroup}>
-                <label>Imagem</label>
-                {imagePreview ? (
-                  <div className={styles.imagePreview}>
-                    <img src={imagePreview} alt="Preview" />
-                    <button
-                      type="button"
-                      className={styles.removeImage}
-                      onClick={() => {
-                        setImageFile(null);
-                        setImagePreview(null);
-                      }}
-                      aria-label="Remover imagem"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                ) : (
-                  <label className={styles.imageUpload}>
+              <form className={modalStyles.form} onSubmit={handleSubmit}>
+                <div className={modalStyles.inputGroup}>
+                  <label>Nome do Produto</label>
+                  <div className={modalStyles.inputWrapper}>
+                    <IconTag size={18} color="#999" className={modalStyles.inputIcon} />
                     <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageChange}
+                      type="text"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Ex: Pulseira Arco-Íris"
+                      required
                     />
-                    <IconUpload size={32} color="#999" />
-                    <p>Clique para <span>enviar uma imagem</span></p>
-                  </label>
-                )}
-              </div>
-            </form>
+                  </div>
+                </div>
 
-            <div className={styles.modalActions}>
-              <button type="button" className={styles.cancelBtn} onClick={onClose}>
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                className={styles.saveBtn}
-                onClick={handleSubmit}
-                disabled={isSubmitting || !name || !price || !category}
-              >
-                {isSubmitting ? 'Salvando...' : product ? 'Atualizar' : 'Criar Produto'}
-              </button>
+                <div className={modalStyles.inputGroup}>
+                  <label>Preço (R$)</label>
+                  <div className={modalStyles.inputWrapper}>
+                    <span className={modalStyles.inputIcon} style={{ fontSize: '14px', fontWeight: 'bold', top: '50%', transform: 'translateY(-50%)' }}>R$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={price}
+                      onChange={(e) => setPrice(e.target.value)}
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className={modalStyles.inputGroup}>
+                  <label>Categoria</label>
+                  <div className={styles.customSelect}>
+                    <div className={modalStyles.inputWrapper}>
+                      <IconPackage size={18} color="#999" className={modalStyles.inputIcon} />
+                      <input
+                        type="text"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        onFocus={() => setShowCategoryDropdown(true)}
+                        onBlur={() => setTimeout(() => setShowCategoryDropdown(false), 200)}
+                        placeholder="Selecione ou digite"
+                        required
+                      />
+                    </div>
+                    {showCategoryDropdown && existingCategories.length > 0 && (
+                      <div className={styles.dropdown} style={{ top: '100%', zIndex: 10 }}>
+                        {existingCategories
+                          .filter(cat => cat.toLowerCase().includes(category.toLowerCase()))
+                          .map(cat => (
+                            <div
+                              key={cat}
+                              className={styles.dropdownItem}
+                              onMouseDown={() => setCategory(cat)}
+                            >
+                              {cat}
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className={modalStyles.inputGroup}>
+                  <label>Subcategoria (Opcional)</label>
+                  <div className={styles.customSelect}>
+                    <div className={modalStyles.inputWrapper}>
+                      <IconPackage size={18} color="#999" className={modalStyles.inputIcon} />
+                      <input
+                        type="text"
+                        value={subcategory}
+                        onChange={(e) => setSubcategory(e.target.value)}
+                        onFocus={() => setShowSubcategoryDropdown(true)}
+                        onBlur={() => setTimeout(() => setShowSubcategoryDropdown(false), 200)}
+                        placeholder="Selecione ou digite"
+                      />
+                    </div>
+                    {showSubcategoryDropdown && existingSubcategories.length > 0 && (
+                      <div className={styles.dropdown} style={{ top: '100%', zIndex: 10 }}>
+                        {existingSubcategories
+                          .filter(sub => sub.toLowerCase().includes(subcategory.toLowerCase()))
+                          .map(sub => (
+                            <div
+                              key={sub}
+                              className={styles.dropdownItem}
+                              onMouseDown={() => setSubcategory(sub)}
+                            >
+                              {sub}
+                            </div>
+                          ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className={modalStyles.inputGroup}>
+                  <label>Imagem</label>
+                  {imagePreview ? (
+                    <div className={styles.imagePreview} style={{ marginTop: '0.5rem' }}>
+                      <img src={imagePreview} alt="Preview" />
+                      <button
+                        type="button"
+                        className={styles.removeImage}
+                        onClick={() => {
+                          setImageFile(null);
+                          setImagePreview(null);
+                        }}
+                        aria-label="Remover imagem"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ) : (
+                    <label className={styles.imageUpload} style={{ background: 'white' }}>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageChange}
+                      />
+                      <IconUpload size={32} color="#999" />
+                      <p>Clique para <span>enviar uma imagem</span></p>
+                    </label>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  className={modalStyles.submitBtn}
+                  disabled={isSubmitting || !name || !price || !category}
+                >
+                  {isSubmitting ? 'Salvando...' : product ? 'Atualizar Produto' : 'Criar Produto'}
+                </button>
+
+                <div style={{ textAlign: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className={modalStyles.switchLink}
+                    style={{ fontSize: '0.9rem' }}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </form>
             </div>
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 
@@ -287,7 +341,19 @@ interface ConfirmDeleteProps {
 }
 
 const ConfirmDeleteModal = ({ isOpen, productName, onClose, onConfirm, isDeleting }: ConfirmDeleteProps) => {
-  return (
+  // Prevenir scroll do body quando modal aberto
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
+  return createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div
@@ -318,7 +384,8 @@ const ConfirmDeleteModal = ({ isOpen, productName, onClose, onConfirm, isDeletin
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 };
 
@@ -692,31 +759,23 @@ export const Admin = () => {
       </div>
 
       {/* Modals */}
-      <AnimatePresence>
-        {isProductModalOpen && (
-          <ProductModal
-            isOpen={isProductModalOpen}
-            product={editingProduct}
-            onClose={() => {
-              setIsProductModalOpen(false);
-              setEditingProduct(null);
-            }}
-            onSave={handleSaveProduct}
-          />
-        )}
-      </AnimatePresence>
+      <ProductModal
+        isOpen={isProductModalOpen}
+        product={editingProduct}
+        onClose={() => {
+          setIsProductModalOpen(false);
+          setEditingProduct(null);
+        }}
+        onSave={handleSaveProduct}
+      />
 
-      <AnimatePresence>
-        {deleteProduct && (
-          <ConfirmDeleteModal
-            isOpen={!!deleteProduct}
-            productName={deleteProduct.name}
-            onClose={() => setDeleteProduct(null)}
-            onConfirm={handleDeleteProduct}
-            isDeleting={isDeleting}
-          />
-        )}
-      </AnimatePresence>
+      <ConfirmDeleteModal
+        isOpen={!!deleteProduct}
+        productName={deleteProduct?.name || ''}
+        onClose={() => setDeleteProduct(null)}
+        onConfirm={handleDeleteProduct}
+        isDeleting={isDeleting}
+      />
 
       {/* Toast Container */}
       <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />

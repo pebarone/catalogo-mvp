@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { IconCheck, IconAlertCircle, IconClose } from './Icons';
 import styles from './Toast.module.css';
@@ -70,7 +71,7 @@ export interface ToastContainerProps {
 }
 
 export const ToastContainer = ({ toasts, onRemove }: ToastContainerProps) => {
-  return (
+  return createPortal(
     <div className={styles.toastContainer}>
       <AnimatePresence>
         {toasts.map((toast) => (
@@ -83,6 +84,7 @@ export const ToastContainer = ({ toasts, onRemove }: ToastContainerProps) => {
           />
         ))}
       </AnimatePresence>
-    </div>
+    </div>,
+    document.body
   );
 };
