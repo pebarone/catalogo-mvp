@@ -87,13 +87,20 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
   const addFavorite = useCallback(async (productId: string) => {
     if (!isAuthenticated) return;
 
+    // Otimista: adicionamos um placeholder temporário para atualizar a UI imediatamente
+    // O ID é o mais importante para o isFavorite funcionar
+    const placeholderProduct = { id: productId } as Product;
+    setFavorites(prev => [...prev, placeholderProduct]);
+
     try {
       await favoritesApi.add(productId);
-      // Recarregar para obter dados completos do produto
+      // Recarregar para obter dados completos do produto (substitui o placeholder)
       const data = await favoritesApi.getAll(false);
       setFavorites(data);
     } catch (err) {
       console.error('Erro ao adicionar favorito:', err);
+      // Rollback
+      setFavorites(prev => prev.filter(p => p.id !== productId));
       throw err;
     }
   }, [isAuthenticated]);

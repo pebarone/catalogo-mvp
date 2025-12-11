@@ -317,6 +317,41 @@ export const productsApi = {
   },
 
   /**
+   * Cria múltiplos produtos em massa (Admin)
+   */
+  createBulk: async (formData: FormData): Promise<{ message: string; createdCount: number; products: Product[] }> => {
+    const token = getAuthToken();
+    const response = await fetch(`${API_BASE_URL}/products/bulk`, {
+      method: 'POST',
+      headers: {
+        ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(
+        errorData.message || errorData.error || `HTTP error! status: ${response.status}`,
+        response.status,
+        errorData.code
+      );
+    }
+
+    const data = await response.json();
+    
+    // Invalidar cache de produtos
+    cacheService.invalidateProducts();
+    
+    // Normalizar produtos retornados
+    if (data.products && Array.isArray(data.products)) {
+      data.products = data.products.map(normalizeProduct);
+    }
+    
+    return data;
+  },
+
+  /**
    * Deleta múltiplos produtos (Admin)
    */
   deleteBulk: async (ids: string[]): Promise<{ message: string; deletedCount: number; deletedIds: string[] }> => {

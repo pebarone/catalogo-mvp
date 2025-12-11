@@ -75,6 +75,61 @@
   justify-content: center;
 }
 
+/* Bulk Product Modal Styles */
+.bulkGrid {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr;
+  gap: 1rem;
+  align-items: start;
+}
+
+.bulkImageUploadLabel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 80px;
+  height: 80px;
+  border: 2px dashed #ddd;
+  border-radius: 8px;
+  cursor: pointer;
+  overflow: hidden;
+  background-color: white;
+  background-position: center;
+  background-size: cover;
+  transition: all 0.2s ease;
+}
+
+.bulkImageUploadLabel:hover {
+  border-color: var(--color-violet);
+  background-color: var(--color-violet-light);
+}
+
+.bulkItemWrapper {
+  background: #f8f9fa;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  border: 1px solid #e9ecef;
+  position: relative;
+}
+
+@media (max-width: 768px) {
+  .bulkGrid {
+    grid-template-columns: 1fr; /* Stack vertically on mobile */
+    gap: 1.5rem;
+  }
+
+  .bulkImageUploadLabel {
+    width: 100%; /* Full width image upload on mobile */
+    height: 120px;
+  }
+
+  .bulkItemWrapper {
+    padding: 1rem;
+  }
+}
+
 .statIcon.products {
   background: linear-gradient(135deg, var(--color-blue-light), var(--color-indigo-light));
   color: var(--color-indigo);

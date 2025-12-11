@@ -6,12 +6,15 @@ import styles from './Products.module.css';
 import { useAuth } from '../contexts/AuthContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { ProductCard } from '../components/ProductCard';
+import { useToast } from '../hooks/useToast';
+import { ToastContainer } from '../components/Toast';
 
 export const Products = () => {
   const { isAuthenticated } = useAuth();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const toast = useToast();
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'default' | 'name-asc' | 'price-asc' | 'price-desc'>('default');
@@ -114,11 +117,18 @@ export const Products = () => {
     }
 
     try {
+      const willBeFavorite = !isFavorite(productId);
       await toggleFavorite(productId);
+      if (willBeFavorite) {
+        toast.success("Adicionado aos favoritos!");
+      } else {
+        toast.success("Removido dos favoritos");
+      }
     } catch (error) {
       console.error('Erro ao atualizar favoritos:', error);
+      toast.error("Erro ao atualizar favoritos");
     }
-  }, [isAuthenticated, toggleFavorite]);
+  }, [isAuthenticated, toggleFavorite, isFavorite, toast]);
 
   const handleCategoryChange = useCallback((category: string) => {
     setSelectedCategory(category);
@@ -330,6 +340,7 @@ export const Products = () => {
           <p>Não há produtos disponíveis {selectedCategory !== 'Todos' ? `na categoria "${selectedCategory}"` : 'no momento'}.</p>
         </div>
       )}
+      <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />
     </div>
   );
 };
