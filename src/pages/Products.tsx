@@ -5,8 +5,6 @@ import styles from './Products.module.css';
 import { useAuth } from '../contexts/AuthContext';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { ProductCard } from '../components/ProductCard';
-import { LoginModal } from '../components/LoginModal';
-import { RegisterModal } from '../components/RegisterModal';
 
 export const Products = () => {
   const { isAuthenticated } = useAuth();
@@ -16,8 +14,6 @@ export const Products = () => {
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<'default' | 'name-asc' | 'price-asc' | 'price-desc'>('default');
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   
   // Paginação
   const [currentPage, setCurrentPage] = useState(1);
