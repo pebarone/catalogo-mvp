@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { productsApi, favoritesApi } from '../services/api';
 import type { Product } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
-import { LoginModal } from '../components/LoginModal';
-import { RegisterModal } from '../components/RegisterModal';
 import { IconArrowLeft, IconHeart, IconWhatsapp, IconEdit } from '../components/Icons';
 import styles from './ProductDetails.module.css';
 
@@ -16,9 +15,18 @@ export const ProductDetails = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
-  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const [isFullScreenImage, setIsFullScreenImage] = useState(false);
+
+  useEffect(() => {
+    if (isFullScreenImage) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isFullScreenImage]);
 
   useEffect(() => {
     const loadProduct = async () => {
@@ -53,7 +61,8 @@ export const ProductDetails = () => {
 
     // Se não está autenticado, abre o modal de login
     if (!isAuthenticated) {
-      setIsLoginModalOpen(true);
+      // Dispara evento customizado para abrir modal da Navbar
+      window.dispatchEvent(new CustomEvent('openLoginModal'));
       return;
     }
 
@@ -193,39 +202,35 @@ export const ProductDetails = () => {
       </motion.div>
 
       {/* Modal de imagem em tela cheia */}
-      {isFullScreenImage && (
-        <div className={styles.fullScreenOverlay} onClick={() => setIsFullScreenImage(false)}>
-          <button className={styles.closeButton} onClick={() => setIsFullScreenImage(false)}>
-            ✕
-          </button>
-          <img
-            src={product.image_url || '/placeholder.jpg'}
-            alt={product.name}
-            className={styles.fullScreenImage}
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
+      {createPortal(
+        <AnimatePresence>
+          {isFullScreenImage && (
+            <motion.div
+              className={styles.fullScreenOverlay}
+              onClick={() => setIsFullScreenImage(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <button className={styles.closeButton} onClick={() => setIsFullScreenImage(false)}>
+                ✕
+              </button>
+              <motion.img
+                src={product.image_url || '/placeholder.jpg'}
+                alt={product.name}
+                className={styles.fullScreenImage}
+                onClick={(e) => e.stopPropagation()}
+                initial={{ scale: 0.95, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.95, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
       )}
-
-      {/* Login Modal */}
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        onSwitchToRegister={() => {
-          setIsLoginModalOpen(false);
-          setIsRegisterModalOpen(true);
-        }}
-      />
-
-      {/* Register Modal */}
-      <RegisterModal
-        isOpen={isRegisterModalOpen}
-        onClose={() => setIsRegisterModalOpen(false)}
-        onSwitchToLogin={() => {
-          setIsRegisterModalOpen(false);
-          setIsLoginModalOpen(true);
-        }}
-      />
     </div>
   );
 };

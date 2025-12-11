@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { IconHeart, IconWhatsapp } from './Icons';
 import type { Product } from '../services/api';
 import { getSubcategoryColor } from '../utils/subcategoryColors';
@@ -20,8 +20,14 @@ interface ProductCardProps {
  */
 export const ProductCard = memo(({ product, isFavorite, onFavoriteToggle }: ProductCardProps) => {
   const prefersReducedMotion = usePrefersReducedMotion();
+  const navigate = useNavigate();
+  
+  const handleCardClick = useCallback(() => {
+    navigate(`/produto/${product.id}`);
+  }, [navigate, product.id]);
   
   const handleFavoriteClick = useCallback((event: React.MouseEvent) => {
+    event.stopPropagation();
     onFavoriteToggle(product.id, event);
   }, [product.id, onFavoriteToggle]);
 
@@ -57,11 +63,12 @@ export const ProductCard = memo(({ product, isFavorite, onFavoriteToggle }: Prod
 
   return (
     <div className={styles.cardWrapper}>
-      <Link to={`/produto/${product.id}`} className={styles.cardLink}>
-        <motion.div
-          {...motionProps}
-          className={styles.card}
-        >
+      <motion.div
+        {...motionProps}
+        className={styles.card}
+        onClick={handleCardClick}
+        style={{ cursor: 'pointer' }}
+      >
           {/* Badge de destaque */}
           {product.is_featured && (
             <div className={styles.featuredBadge}>⭐ Destaque</div>
@@ -121,8 +128,7 @@ export const ProductCard = memo(({ product, isFavorite, onFavoriteToggle }: Prod
               />
             </button>
           </div>
-        </motion.div>
-      </Link>
+      </motion.div>
     </div>
   );
 }, (prevProps, nextProps) => {

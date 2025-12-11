@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -29,6 +29,18 @@ export const Navbar = () => {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
   const location = useLocation();
   const { isAuthenticated, isAdmin, user, logout } = useAuth();
+
+  // Escuta eventos customizados de outras páginas para abrir modal
+  useEffect(() => {
+    const handleOpenLoginModal = () => {
+      setIsLoginModalOpen(true);
+    };
+
+    window.addEventListener('openLoginModal', handleOpenLoginModal);
+    return () => {
+      window.removeEventListener('openLoginModal', handleOpenLoginModal);
+    };
+  }, []);
 
   // Adicionar link de favoritos se autenticado e link de admin se for admin
   const links = [

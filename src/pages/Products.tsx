@@ -111,7 +111,8 @@ export const Products = () => {
     event.stopPropagation();
 
     if (!isAuthenticated) {
-      setIsLoginModalOpen(true);
+      // Dispara evento customizado para abrir modal da Navbar
+      window.dispatchEvent(new CustomEvent('openLoginModal'));
       return;
     }
 
@@ -120,7 +121,7 @@ export const Products = () => {
     } catch (error) {
       console.error('Erro ao atualizar favoritos:', error);
     }
-  }, [isAuthenticated, toggleFavorite, setIsLoginModalOpen]);
+  }, [isAuthenticated, toggleFavorite]);
 
   const handleCategoryChange = useCallback((category: string) => {
     setSelectedCategory(category);
@@ -314,26 +315,6 @@ export const Products = () => {
           <p>Não há produtos disponíveis {selectedCategory !== 'Todos' ? `na categoria "${selectedCategory}"` : 'no momento'}.</p>
         </div>
       )}
-
-      {/* Login Modal */}
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
-        onSwitchToRegister={() => {
-          setIsLoginModalOpen(false);
-          setIsRegisterModalOpen(true);
-        }}
-      />
-
-      {/* Register Modal */}
-      <RegisterModal
-        isOpen={isRegisterModalOpen}
-        onClose={() => setIsRegisterModalOpen(false)}
-        onSwitchToLogin={() => {
-          setIsRegisterModalOpen(false);
-          setIsLoginModalOpen(true);
-        }}
-      />
     </div>
   );
 };
