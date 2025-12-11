@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useNavigate } from 'react-router-dom';
 import { IconHeart, IconWhatsapp } from './Icons';
 import type { Product } from '../services/api';
@@ -51,22 +51,41 @@ export const ProductCard = memo(({ product, isFavorite, onFavoriteToggle }: Prod
   // Animações otimizadas para performance
   // Usa apenas propriedades GPU-accelerated (transform, opacity)
   const motionProps = useMemo(() => ({
-    initial: prefersReducedMotion ? false : { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: prefersReducedMotion ? undefined : { opacity: 0 },
-    whileHover: prefersReducedMotion ? undefined : { y: -5 },
+    initial: prefersReducedMotion ? { opacity: 1 } : { opacity: 0, scale: 0.9 },
+    animate: { opacity: 1, scale: 1 },
+    exit: prefersReducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.9 },
+    whileHover: prefersReducedMotion ? undefined : { y: -8, transition: { duration: 0.2 } },
+    whileTap: prefersReducedMotion ? undefined : { scale: 0.98 },
+    layout: true,
     transition: { 
+      layout: { duration: 0.3 },
       opacity: { duration: 0.2 },
-      y: { type: "tween" as const, duration: 0.15 } // Tween é mais leve que spring
+      scale: { duration: 0.2 }
     }
   }), [prefersReducedMotion]);
 
+  const imageVariants = {
+    hover: { scale: 1.1, transition: { duration: 0.4, ease: "easeOut" as const } }
+  };
+
   return (
-    <div className={styles.cardWrapper}>
+    <motion.div 
+      layout
+      className={styles.cardWrapper}
+      initial={motionProps.initial}
+      animate={motionProps.animate}
+      exit={motionProps.exit}
+    >
       <motion.div
-        {...motionProps}
         className={styles.card}
         onClick={handleCardClick}
+        whileHover={prefersReducedMotion ? undefined : "hover"}
+        animate={prefersReducedMotion ? undefined : "rest"}
+        whileTap={motionProps.whileTap}
+        variants={{
+          rest: { y: 0, boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)" },
+          hover: { y: -8, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)" }
+        }}
         style={{ cursor: 'pointer' }}
       >
           {/* Badge de destaque */}
@@ -75,11 +94,12 @@ export const ProductCard = memo(({ product, isFavorite, onFavoriteToggle }: Prod
           )}
           
           <div className={styles.cardImageWrapper}>
-            <img 
+            <motion.img 
               src={product.image_url || '/placeholder.jpg'} 
               alt={product.name} 
               loading="lazy"
               decoding="async"
+              variants={prefersReducedMotion ? undefined : imageVariants}
             />
           </div>
           
@@ -129,7 +149,7 @@ export const ProductCard = memo(({ product, isFavorite, onFavoriteToggle }: Prod
             </button>
           </div>
       </motion.div>
-    </div>
+    </motion.div>
   );
 }, (prevProps, nextProps) => {
   // Comparação customizada para evitar re-renders desnecessários

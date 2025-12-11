@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { IconHeart } from '../components/Icons';
 import styles from './About.module.css';
 
@@ -23,12 +23,18 @@ export const About = () => {
             transition={{ delay: 0.2, duration: 0.5 }}
           >
             <div className={styles.imageWrapper}>
-              <img 
+              <motion.img 
                 src="/profile.jpg" 
                 alt="Mel Salomão" 
                 className={styles.profileImage}
+                whileHover={{ scale: 1.05 }}
+                transition={{ duration: 0.3 }}
               />
-              <div className={styles.imageDecoration}></div>
+              <motion.div 
+                className={styles.imageDecoration}
+                animate={{ rotate: 360 }}
+                transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+              />
             </div>
           </motion.div>
 

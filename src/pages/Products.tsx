@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { productsApi } from '../services/api';
 import type { Product } from '../services/api';
 import styles from './Products.module.css';
@@ -243,30 +244,48 @@ export const Products = () => {
 
       {isLoading ? (
         // Loading skeleton
-        <div className={styles.grid}>
+        <motion.div className={styles.grid} layout>
           {Array.from({ length: itemsPerPage }).map((_, i) => (
             <div key={i} className={styles.cardSkeleton}>
-              <div className={styles.skeletonImage}></div>
+              <motion.div 
+                className={styles.skeletonImage}
+                animate={{ opacity: [0.5, 1, 0.5] }}
+                transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+              ></motion.div>
               <div className={styles.skeletonContent}>
-                <div className={styles.skeletonBadge}></div>
-                <div className={styles.skeletonTitle}></div>
-                <div className={styles.skeletonPrice}></div>
+                <motion.div 
+                  className={styles.skeletonBadge}
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
+                ></motion.div>
+                <motion.div 
+                  className={styles.skeletonTitle}
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+                ></motion.div>
+                <motion.div 
+                  className={styles.skeletonPrice}
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
+                ></motion.div>
               </div>
             </div>
           ))}
-        </div>
+        </motion.div>
       ) : sortedProducts.length > 0 ? (
         <>
-          <div className={styles.grid}>
-            {sortedProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                isFavorite={isFavorite(product.id)}
-                onFavoriteToggle={handleFavoriteToggle}
-              />
-            ))}
-          </div>
+          <motion.div className={styles.grid} layout>
+            <AnimatePresence mode="popLayout">
+              {sortedProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  isFavorite={isFavorite(product.id)}
+                  onFavoriteToggle={handleFavoriteToggle}
+                />
+              ))}
+            </AnimatePresence>
+          </motion.div>
 
           {/* Paginação */}
           {totalPages > 1 && (

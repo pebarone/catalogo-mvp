@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { 
   IconDashboard, 
   IconAdd, 
@@ -117,159 +117,163 @@ const ProductModal = ({ isOpen, product, onClose, onSave }: ProductModalProps) =
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <motion.div
-      className={styles.modalOverlay}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <motion.div
-        className={styles.productModal}
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-      >
-        <div className={styles.modalHeader}>
-          <h2>{product ? 'Editar Produto' : 'Novo Produto'}</h2>
-          <button className={styles.modalClose} onClick={onClose}>
-            <img src="/closeicon.svg" alt="Fechar" width={20} height={20} />
-          </button>
-        </div>
-
-        <form className={styles.modalForm} onSubmit={handleSubmit}>
-          <div className={styles.formGroup}>
-            <label>Nome do Produto</label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Ex: Pulseira Arco-Íris"
-              required
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Preço (R$)</label>
-            <input
-              type="number"
-              step="0.01"
-              min="0"
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              placeholder="0.00"
-              required
-            />
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Categoria</label>
-            <div className={styles.customSelect}>
-              <input
-                type="text"
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                onFocus={() => setShowCategoryDropdown(true)}
-                onBlur={() => setTimeout(() => setShowCategoryDropdown(false), 200)}
-                placeholder="Selecione ou digite uma categoria"
-                required
-              />
-              {showCategoryDropdown && existingCategories.length > 0 && (
-                <div className={styles.dropdown}>
-                  {existingCategories
-                    .filter(cat => cat.toLowerCase().includes(category.toLowerCase()))
-                    .map(cat => (
-                      <div
-                        key={cat}
-                        className={styles.dropdownItem}
-                        onMouseDown={() => setCategory(cat)}
-                      >
-                        {cat}
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Subcategoria (Opcional)</label>
-            <div className={styles.customSelect}>
-              <input
-                type="text"
-                value={subcategory}
-                onChange={(e) => setSubcategory(e.target.value)}
-                onFocus={() => setShowSubcategoryDropdown(true)}
-                onBlur={() => setTimeout(() => setShowSubcategoryDropdown(false), 200)}
-                placeholder="Selecione ou digite uma subcategoria"
-              />
-              {showSubcategoryDropdown && existingSubcategories.length > 0 && (
-                <div className={styles.dropdown}>
-                  {existingSubcategories
-                    .filter(sub => sub.toLowerCase().includes(subcategory.toLowerCase()))
-                    .map(sub => (
-                      <div
-                        key={sub}
-                        className={styles.dropdownItem}
-                        onMouseDown={() => setSubcategory(sub)}
-                      >
-                        {sub}
-                      </div>
-                    ))}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label>Imagem</label>
-            {imagePreview ? (
-              <div className={styles.imagePreview}>
-                <img src={imagePreview} alt="Preview" />
-                <button
-                  type="button"
-                  className={styles.removeImage}
-                  onClick={() => {
-                    setImageFile(null);
-                    setImagePreview(null);
-                  }}
-                  aria-label="Remover imagem"
-                >
-                  ✕
-                </button>
-              </div>
-            ) : (
-              <label className={styles.imageUpload}>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageChange}
-                />
-                <IconUpload size={32} color="#999" />
-                <p>Clique para <span>enviar uma imagem</span></p>
-              </label>
-            )}
-          </div>
-        </form>
-
-        <div className={styles.modalActions}>
-          <button type="button" className={styles.cancelBtn} onClick={onClose}>
-            Cancelar
-          </button>
-          <button
-            type="submit"
-            className={styles.saveBtn}
-            onClick={handleSubmit}
-            disabled={isSubmitting || !name || !price || !category}
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className={styles.modalOverlay}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          onClick={(e) => e.target === e.currentTarget && onClose()}
+        >
+          <motion.div
+            className={styles.productModal}
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           >
-            {isSubmitting ? 'Salvando...' : product ? 'Atualizar' : 'Criar Produto'}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
+            <div className={styles.modalHeader}>
+              <h2>{product ? 'Editar Produto' : 'Novo Produto'}</h2>
+              <button className={styles.modalClose} onClick={onClose}>
+                <img src="/closeicon.svg" alt="Fechar" width={20} height={20} />
+              </button>
+            </div>
+
+            <form className={styles.modalForm} onSubmit={handleSubmit}>
+              <div className={styles.formGroup}>
+                <label>Nome do Produto</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Ex: Pulseira Arco-Íris"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Preço (R$)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={price}
+                  onChange={(e) => setPrice(e.target.value)}
+                  placeholder="0.00"
+                  required
+                />
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Categoria</label>
+                <div className={styles.customSelect}>
+                  <input
+                    type="text"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    onFocus={() => setShowCategoryDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowCategoryDropdown(false), 200)}
+                    placeholder="Selecione ou digite uma categoria"
+                    required
+                  />
+                  {showCategoryDropdown && existingCategories.length > 0 && (
+                    <div className={styles.dropdown}>
+                      {existingCategories
+                        .filter(cat => cat.toLowerCase().includes(category.toLowerCase()))
+                        .map(cat => (
+                          <div
+                            key={cat}
+                            className={styles.dropdownItem}
+                            onMouseDown={() => setCategory(cat)}
+                          >
+                            {cat}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Subcategoria (Opcional)</label>
+                <div className={styles.customSelect}>
+                  <input
+                    type="text"
+                    value={subcategory}
+                    onChange={(e) => setSubcategory(e.target.value)}
+                    onFocus={() => setShowSubcategoryDropdown(true)}
+                    onBlur={() => setTimeout(() => setShowSubcategoryDropdown(false), 200)}
+                    placeholder="Selecione ou digite uma subcategoria"
+                  />
+                  {showSubcategoryDropdown && existingSubcategories.length > 0 && (
+                    <div className={styles.dropdown}>
+                      {existingSubcategories
+                        .filter(sub => sub.toLowerCase().includes(subcategory.toLowerCase()))
+                        .map(sub => (
+                          <div
+                            key={sub}
+                            className={styles.dropdownItem}
+                            onMouseDown={() => setSubcategory(sub)}
+                          >
+                            {sub}
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <label>Imagem</label>
+                {imagePreview ? (
+                  <div className={styles.imagePreview}>
+                    <img src={imagePreview} alt="Preview" />
+                    <button
+                      type="button"
+                      className={styles.removeImage}
+                      onClick={() => {
+                        setImageFile(null);
+                        setImagePreview(null);
+                      }}
+                      aria-label="Remover imagem"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ) : (
+                  <label className={styles.imageUpload}>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                    />
+                    <IconUpload size={32} color="#999" />
+                    <p>Clique para <span>enviar uma imagem</span></p>
+                  </label>
+                )}
+              </div>
+            </form>
+
+            <div className={styles.modalActions}>
+              <button type="button" className={styles.cancelBtn} onClick={onClose}>
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                className={styles.saveBtn}
+                onClick={handleSubmit}
+                disabled={isSubmitting || !name || !price || !category}
+              >
+                {isSubmitting ? 'Salvando...' : product ? 'Atualizar' : 'Criar Produto'}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
@@ -283,34 +287,38 @@ interface ConfirmDeleteProps {
 }
 
 const ConfirmDeleteModal = ({ isOpen, productName, onClose, onConfirm, isDeleting }: ConfirmDeleteProps) => {
-  if (!isOpen) return null;
-
   return (
-    <motion.div
-      className={styles.modalOverlay}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-    >
-      <motion.div
-        className={styles.confirmModal}
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-      >
-        <IconAlert size={48} color="#FF595E" />
-        <h3>Excluir Produto</h3>
-        <p>Tem certeza que deseja excluir <strong>"{productName}"</strong>? Esta ação não pode ser desfeita.</p>
-        <div className={styles.confirmActions}>
-          <button className={styles.cancelBtn} onClick={onClose} disabled={isDeleting}>
-            Cancelar
-          </button>
-          <button className={styles.deleteBtn} onClick={onConfirm} disabled={isDeleting}>
-            {isDeleting ? 'Excluindo...' : 'Excluir'}
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          className={styles.modalOverlay}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <motion.div
+            className={styles.confirmModal}
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          >
+            <IconAlert size={48} color="#FF595E" />
+            <h3>Excluir Produto</h3>
+            <p>Tem certeza que deseja excluir <strong>"{productName}"</strong>? Esta ação não pode ser desfeita.</p>
+            <div className={styles.confirmActions}>
+              <button className={styles.cancelBtn} onClick={onClose} disabled={isDeleting}>
+                Cancelar
+              </button>
+              <button className={styles.deleteBtn} onClick={onConfirm} disabled={isDeleting}>
+                {isDeleting ? 'Excluindo...' : 'Excluir'}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
@@ -469,21 +477,26 @@ export const Admin = () => {
           <IconDashboard size={28} color="#6A4C93" />
           <h1>Administração</h1>
         </div>
-        <button
+        <motion.button
           className={styles.addBtn}
           onClick={() => {
             setEditingProduct(null);
             setIsProductModalOpen(true);
           }}
+          whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(106, 76, 147, 0.4)" }}
+          whileTap={{ scale: 0.95 }}
         >
           <IconAdd size={20} color="white" />
           Adicionar Produto
-        </button>
+        </motion.button>
       </div>
 
       {/* Stats */}
       <div className={styles.stats}>
-        <div className={styles.statCard}>
+        <motion.div 
+          className={styles.statCard}
+          whileHover={{ y: -4, boxShadow: "0 10px 30px rgba(0, 0, 0, 0.12)" }}
+        >
           <div className={`${styles.statIcon} ${styles.products}`}>
             <IconPackage size={24} color="#4267AC" />
           </div>
@@ -491,9 +504,12 @@ export const Admin = () => {
             <h3>{products.length}</h3>
             <p>Produtos Cadastrados</p>
           </div>
-        </div>
+        </motion.div>
 
-        <div className={styles.statCard}>
+        <motion.div 
+          className={styles.statCard}
+          whileHover={{ y: -4, boxShadow: "0 10px 30px rgba(0, 0, 0, 0.12)" }}
+        >
           <div className={`${styles.statIcon} ${styles.categories}`}>
             <IconTag size={24} color="#8AC926" />
           </div>
@@ -501,9 +517,12 @@ export const Admin = () => {
             <h3>{uniqueCategories}</h3>
             <p>Categorias</p>
           </div>
-        </div>
+        </motion.div>
 
-        <div className={styles.statCard}>
+        <motion.div 
+          className={styles.statCard}
+          whileHover={{ y: -4, boxShadow: "0 10px 30px rgba(0, 0, 0, 0.12)" }}
+        >
           <div className={`${styles.statIcon} ${styles.recent}`}>
             <IconHistory size={24} color="#6A4C93" />
           </div>
@@ -511,9 +530,12 @@ export const Admin = () => {
             <h3>{recentProducts}</h3>
             <p>Adicionados esta semana</p>
           </div>
-        </div>
+        </motion.div>
 
-        <div className={styles.statCard}>
+        <motion.div 
+          className={styles.statCard}
+          whileHover={{ y: -4, boxShadow: "0 10px 30px rgba(0, 0, 0, 0.12)" }}
+        >
           <div className={`${styles.statIcon} ${styles.featured}`}>
             <span style={{ fontSize: '24px' }}>⭐</span>
           </div>
@@ -521,7 +543,7 @@ export const Admin = () => {
             <h3>{featuredCount}/6</h3>
             <p>Produtos em Destaque</p>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Products Table */}
@@ -541,7 +563,11 @@ export const Admin = () => {
 
         {isLoading ? (
           <div className={styles.loading}>
-            <div className={styles.loadingSpinner}></div>
+            <motion.div 
+              className={styles.loadingSpinner}
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            />
             <p>Carregando produtos...</p>
           </div>
         ) : filteredProducts.length === 0 ? (
@@ -554,16 +580,18 @@ export const Admin = () => {
                 : 'Comece adicionando seu primeiro produto!'}
             </p>
             {!searchQuery && (
-              <button
+              <motion.button
                 className={styles.addBtn}
                 onClick={() => {
                   setEditingProduct(null);
                   setIsProductModalOpen(true);
                 }}
+                whileHover={{ scale: 1.05, boxShadow: "0 8px 25px rgba(106, 76, 147, 0.4)" }}
+                whileTap={{ scale: 0.95 }}
               >
                 <IconAdd size={20} color="white" />
                 Adicionar Produto
-              </button>
+              </motion.button>
             )}
           </div>
         ) : (
@@ -577,9 +605,19 @@ export const Admin = () => {
                 <th>Ações</th>
               </tr>
             </thead>
-            <tbody>
+            <motion.tbody
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
               {filteredProducts.map((product) => (
-                <tr key={product.id}>
+                <motion.tr 
+                  key={product.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  layout
+                >
                   <td>
                     <div className={styles.productCell}>
                       <img
@@ -623,28 +661,32 @@ export const Admin = () => {
                   </td>
                   <td>
                     <div className={styles.actions}>
-                      <button
+                      <motion.button
                         className={`${styles.actionBtn} ${styles.edit}`}
                         onClick={() => {
                           setEditingProduct(product);
                           setIsProductModalOpen(true);
                         }}
                         title="Editar"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                       >
                         <IconEdit size={20} className={styles.icon} />
-                      </button>
-                      <button
+                      </motion.button>
+                      <motion.button
                         className={`${styles.actionBtn} ${styles.delete}`}
                         onClick={() => setDeleteProduct(product)}
                         title="Excluir"
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.9 }}
                       >
                         <IconDelete size={20} className={styles.icon} />
-                      </button>
+                      </motion.button>
                     </div>
                   </td>
-                </tr>
+                </motion.tr>
               ))}
-            </tbody>
+            </motion.tbody>
           </table>
         )}
       </div>

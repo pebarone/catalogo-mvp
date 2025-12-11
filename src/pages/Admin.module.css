@@ -46,12 +46,6 @@
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.addBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(106, 76, 147, 0.4);
 }
 
 /* Stats Cards */
@@ -70,11 +64,6 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition: transform 0.3s ease;
-}
-
-.statCard:hover {
-  transform: translateY(-4px);
 }
 
 .statIcon {
@@ -275,7 +264,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
   padding: 0;
 }
 
@@ -288,19 +276,9 @@
   color: var(--color-blue);
 }
 
-.actionBtn.edit:hover {
-  background: var(--color-blue);
-  color: white;
-}
-
 .actionBtn.delete {
   background: var(--color-red-light);
   color: var(--color-red);
-}
-
-.actionBtn.delete:hover {
-  background: var(--color-red);
-  color: white;
 }
 
 /* Empty State */

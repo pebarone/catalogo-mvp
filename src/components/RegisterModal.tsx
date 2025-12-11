@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { IconMail, IconKey, IconEye, IconEyeOff, IconAlertCircle, IconUserPlus } from './Icons';
 import { useAuth } from '../contexts/AuthContext';
 import { isValidEmail } from '../services/api';

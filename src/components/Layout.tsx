@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useShouldReduceAnimations } from '../hooks/useIsMobile';
 
 export const Layout = () => {

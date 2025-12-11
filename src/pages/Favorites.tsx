@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { useFavorites } from '../contexts/FavoritesContext';
 import { IconHeart, IconHeartFilled, IconAlertCircle } from '../components/Icons';
 import styles from './Favorites.module.css';
@@ -42,7 +42,11 @@ export const Favorites = () => {
     return (
       <div className={styles.container}>
         <div className={styles.loadingContainer}>
-          <div className={styles.spinner}></div>
+          <motion.div 
+            className={styles.spinner}
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
           <p>Carregando favoritos...</p>
         </div>
       </div>
@@ -55,9 +59,14 @@ export const Favorites = () => {
         <div className={styles.errorContainer}>
           <IconAlertCircle size={48} color="#c62828" />
           <p>{error}</p>
-          <button onClick={refreshFavorites} className={styles.retryBtn}>
+          <motion.button 
+            onClick={refreshFavorites} 
+            className={styles.retryBtn}
+            whileHover={{ scale: 1.05, backgroundColor: "#5a3d7d" }}
+            whileTap={{ scale: 0.95 }}
+          >
             Tentar novamente
-          </button>
+          </motion.button>
         </div>
       </div>
     );
@@ -82,8 +91,14 @@ export const Favorites = () => {
           <IconHeart size={64} color="#ccc" />
           <h2>Nenhum favorito ainda</h2>
           <p>Explore nossos produtos e adicione seus favoritos clicando no coração ❤️</p>
-          <Link to="/produtos" className={styles.exploreBtn}>
-            Explorar Produtos
+          <Link to="/produtos">
+            <motion.button 
+              className={styles.exploreBtn}
+              whileHover={{ scale: 1.05, backgroundColor: "#5a3d7d" }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Explorar Produtos
+            </motion.button>
           </Link>
         </div>
       ) : (
@@ -98,15 +113,17 @@ export const Favorites = () => {
               key={product.id}
               className={styles.card}
               variants={itemVariants}
-              whileHover={{ y: -8 }}
+              whileHover={{ y: -8, boxShadow: "0 8px 24px rgba(0, 0, 0, 0.15)" }}
               transition={{ type: 'spring', stiffness: 300, damping: 20 }}
             >
               <Link to={`/produto/${product.id}`} className={styles.imageWrapper}>
-                <img
+                <motion.img
                   src={product.image_url || '/placeholder-product.jpg'}
                   alt={product.name}
                   className={styles.image}
                   loading="lazy"
+                  whileHover={{ scale: 1.1 }}
+                  transition={{ duration: 0.3 }}
                 />
                 {product.is_featured && (
                   <span className={styles.featuredBadge}>⭐ Destaque</span>

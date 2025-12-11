@@ -44,15 +44,7 @@
   padding: 1rem;
   border-radius: 16px;
   border: 1px solid #eee;
-  transition: all 0.3s;
   text-align: left;
-}
-
-.linkItem:hover {
-  background: white;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-  border-color: var(--color-blue-light);
-  transform: translateX(5px);
 }
 
 .iconBox {

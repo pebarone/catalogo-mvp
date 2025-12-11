@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { IconArrowRight } from '../components/Icons';
 import styles from './Home.module.css';
 import { productsApi } from '../services/api';
 import type { Product } from '../services/api';
 import { getSubcategoryColor } from '../utils/subcategoryColors';
+
+const MotionLink = motion.create(Link);
 
 export const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
@@ -104,21 +106,62 @@ export const Home = () => {
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.6 }}
           >
-            <Link to="/produtos" className={styles.ctaButton}>
+            <MotionLink 
+              to="/produtos" 
+              className={styles.ctaButton}
+              whileHover={{ scale: 1.05, backgroundColor: "#1982C4", boxShadow: "0 15px 30px rgba(25, 130, 196, 0.3)" }}
+              whileTap={{ scale: 0.95 }}
+            >
               Ver Coleção <IconArrowRight size={20} />
-            </Link>
+            </MotionLink>
           </motion.div>
         </div>
 
         <div className={styles.heroVisual}>
-           <div className={styles.blob1}></div>
-           <div className={styles.blob2}></div>
-           <div className={styles.blob3}></div>
-           <img 
+           <motion.div 
+             className={styles.blob1}
+             animate={{ 
+               transform: [
+                 "translate3d(0, 0, 0) rotate(0deg)",
+                 "translate3d(30px, -30px, 0) rotate(10deg)",
+                 "translate3d(-20px, 20px, 0) rotate(-5deg)",
+                 "translate3d(0, 0, 0) rotate(0deg)"
+               ]
+             }}
+             transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+           />
+           <motion.div 
+             className={styles.blob2}
+             animate={{ 
+               transform: [
+                 "translate3d(0, 0, 0) rotate(0deg)",
+                 "translate3d(30px, -30px, 0) rotate(10deg)",
+                 "translate3d(-20px, 20px, 0) rotate(-5deg)",
+                 "translate3d(0, 0, 0) rotate(0deg)"
+               ]
+             }}
+             transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+           />
+           <motion.div 
+             className={styles.blob3}
+             animate={{ 
+               transform: [
+                 "translate3d(0, 0, 0) rotate(0deg)",
+                 "translate3d(30px, -30px, 0) rotate(10deg)",
+                 "translate3d(-20px, 20px, 0) rotate(-5deg)",
+                 "translate3d(0, 0, 0) rotate(0deg)"
+               ]
+             }}
+             transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 4 }}
+           />
+           <motion.img 
              src={"/produto3.jpg"} 
              alt="Acessórios Coloridos" 
              className={styles.heroImage}
              decoding="async"
+             whileHover={{ scale: 1.02, rotate: 0 }}
+             initial={{ rotate: -2 }}
+             transition={{ type: "spring", stiffness: 300, damping: 20 }}
            />
         </div>
       </section>
@@ -135,10 +178,22 @@ export const Home = () => {
           <div className={styles.grid}>
             {[1, 2, 3].map((i) => (
               <div key={i} className={styles.cardSkeleton}>
-                <div className={styles.skeletonImage}></div>
+                <motion.div 
+                  className={styles.skeletonImage}
+                  animate={{ opacity: [0.5, 1, 0.5] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                />
                 <div className={styles.skeletonContent}>
-                  <div className={styles.skeletonTitle}></div>
-                  <div className={styles.skeletonPrice}></div>
+                  <motion.div 
+                    className={styles.skeletonTitle}
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.1 }}
+                  />
+                  <motion.div 
+                    className={styles.skeletonPrice}
+                    animate={{ opacity: [0.5, 1, 0.5] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.2 }}
+                  />
                 </div>
               </div>
             ))}
@@ -154,17 +209,24 @@ export const Home = () => {
                       initial={{ opacity: 0, scale: 0.95 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.95 }}
-                      whileHover={{ y: -10 }}
+                      whileHover="hover"
                       transition={{ duration: 0.3 }}
                       className={styles.card}
+                      variants={{
+                        hover: { y: -10, boxShadow: "0 20px 40px rgba(0,0,0,0.1)" }
+                      }}
                     >
                       <div className={styles.cardImageWrapper}>
-                        <img 
+                        <motion.img 
                           src={product.image_url || '/placeholder.jpg'} 
                           alt={product.name} 
                           className={styles.cardImage}
                           loading="lazy"
                           decoding="async"
+                          variants={{
+                            hover: { scale: 1.1 }
+                          }}
+                          transition={{ duration: 0.5 }}
                         />
                       </div>
                       <div className={styles.cardContent}>
@@ -192,11 +254,16 @@ export const Home = () => {
             {maxSlides > 1 && (
               <div className={styles.carouselIndicators}>
                 {Array.from({ length: maxSlides }).map((_, index) => (
-                  <button
+                  <motion.button
                     key={index}
                     className={`${styles.indicator} ${currentSlide === index ? styles.active : ''}`}
                     onClick={() => setCurrentSlide(index)}
                     aria-label={`Ir para slide ${index + 1}`}
+                    whileHover={{ scale: 1.2, backgroundColor: "#aaa" }}
+                    animate={{ 
+                      width: currentSlide === index ? 30 : 12,
+                      backgroundColor: currentSlide === index ? "#1982C4" : "#ddd"
+                    }}
                   />
                 ))}
               </div>
@@ -205,7 +272,14 @@ export const Home = () => {
         ) : (
           <div className={styles.emptyState}>
             <p>Nenhum produto em destaque no momento.</p>
-            <Link to="/produtos" className={styles.ctaButton}>Ver Coleção Completa</Link>
+            <MotionLink 
+              to="/produtos" 
+              className={styles.ctaButton}
+              whileHover={{ scale: 1.05, backgroundColor: "#1982C4" }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Ver Coleção Completa
+            </MotionLink>
           </div>
         )}
       </section>

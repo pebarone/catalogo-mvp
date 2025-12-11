@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { IconCheck, IconAlertCircle, IconClose } from './Icons';
 import styles from './Toast.module.css';
 
@@ -12,7 +12,7 @@ export interface ToastProps {
   onClose: () => void;
 }
 
-export const Toast = ({ message, type, duration = 5000, onClose }: ToastProps) => {
+export const Toast = ({ message, type, duration = 2000, onClose }: ToastProps) => {
   useEffect(() => {
     if (duration > 0) {
       const timer = setTimeout(onClose, duration);

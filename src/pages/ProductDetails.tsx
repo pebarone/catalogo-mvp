@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 import { productsApi, favoritesApi } from '../services/api';
 import type { Product } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';

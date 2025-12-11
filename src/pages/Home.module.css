@@ -70,14 +70,7 @@
   border-radius: 3rem;
   font-weight: 600;
   text-decoration: none;
-  transition: all 0.3s;
   box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-}
-
-.ctaButton:hover {
-  background: var(--color-blue);
-  transform: translateY(-3px);
-  box-shadow: 0 15px 30px rgba(25, 130, 196, 0.3);
 }
 
 .heroVisual {
@@ -95,11 +88,10 @@
   z-index: 2;
   box-shadow: 20px 20px 0 var(--color-orange-light);
   transform: rotate(-2deg);
-  transition: transform 0.5s;
 }
 
 .heroVisual:hover .heroImage {
-  transform: rotate(0deg) scale(1.02);
+  /* Removed CSS hover effect */
 }
 
 .blob1, .blob2, .blob3 {
@@ -108,8 +100,7 @@
   filter: blur(60px);
   z-index: 1;
   opacity: 0.6;
-  animation: float 10s infinite ease-in-out;
-  /* Otimização: usa compositing layer separado para evitar repaint */
+  /* Removed CSS animation */
   will-change: transform;
   transform: translateZ(0);
   contain: strict;
@@ -188,7 +179,6 @@
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
-  transition: all 0.3s;
 }
 
 .cardImageWrapper {
@@ -200,11 +190,6 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s;
-}
-
-.card:hover .cardImage {
-  transform: scale(1.1);
 }
 
 .cardContent {
@@ -232,9 +217,7 @@
 
 .skeletonImage {
   aspect-ratio: 1;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  background: #f0f0f0;
 }
 
 .skeletonContent {
@@ -243,25 +226,16 @@
 
 .skeletonTitle {
   height: 20px;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
+  background: #f0f0f0;
   border-radius: 4px;
   margin-bottom: 0.75rem;
-  animation: shimmer 1.5s infinite;
 }
 
 .skeletonPrice {
   height: 24px;
   width: 60%;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e8e8e8 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
+  background: #f0f0f0;
   border-radius: 4px;
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
 }
 
 /* Empty State */
@@ -308,27 +282,21 @@
 }
 
 .indicator.active {
+.indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #ddd;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.indicator.active {
   background: var(--color-blue);
   width: 30px;
   border-radius: 6px;
-}
-
-.featuredBadge {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: linear-gradient(135deg, #FFD700, #FFA500);
-  color: #333;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 700;
-  z-index: 5;
-  box-shadow: 0 4px 10px rgba(255, 215, 0, 0.3);
-}
-
-.subcategory {
-  display: inline-block;
+} display: inline-block;
   padding: 0.3rem 0.8rem;
   border-radius: 12px;
   font-size: 0.85rem;
