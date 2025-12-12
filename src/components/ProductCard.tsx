@@ -159,7 +159,8 @@ export const ProductCard = memo(({ product, isFavorite, onFavoriteToggle }: Prod
     prevProps.product.name === nextProps.product.name &&
     prevProps.product.price === nextProps.product.price &&
     prevProps.product.image_url === nextProps.product.image_url &&
-    prevProps.product.is_featured === nextProps.product.is_featured
+    prevProps.product.is_featured === nextProps.product.is_featured &&
+    prevProps.onFavoriteToggle === nextProps.onFavoriteToggle
   );
 });
 

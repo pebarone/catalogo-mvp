@@ -11,7 +11,8 @@ import {
   IconEdit, 
   IconDelete, 
   IconUpload,
-  IconAlert
+  IconAlert,
+  IconStar
 } from '../components/Icons';
 import { productsApi, ApiError } from '../services/api';
 import type { Product } from '../services/api';
@@ -1061,7 +1062,7 @@ export const Admin = () => {
 
         <motion.div className={styles.statCard} whileHover={{ y: -4 }}>
           <div className={`${styles.statIcon} ${styles.featured}`}>
-            <span style={{ fontSize: '24px' }}>⭐</span>
+            <IconStar size={24} color="#ff9800" fill="#ff9800" />
           </div>
           <div className={styles.statInfo}>
             <h3>{stats.featuredCount}/6</h3>
