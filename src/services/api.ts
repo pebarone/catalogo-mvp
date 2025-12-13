@@ -155,21 +155,36 @@ async function tryRefreshToken(): Promise<string | null> {
     return null;
   }
 
+  console.log('[Auth] Tentando renovar token com refresh token...');
+  
   try {
+    const requestBody = { refreshToken };
+    console.log('[Auth] Request body:', JSON.stringify(requestBody));
+    
     const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ refreshToken }),
+      body: JSON.stringify(requestBody),
     });
 
+    console.log('[Auth] Refresh response status:', response.status);
+
     if (!response.ok) {
-      console.warn('[Auth] Refresh token expirado ou inválido');
+      const errorData = await response.json().catch(() => ({}));
+      console.warn('[Auth] Refresh token expirado ou inválido:', errorData);
       return null;
     }
 
     const data: RefreshResponse = await response.json();
+    console.log('[Auth] Refresh response data:', { hasAccessToken: !!data.accessToken, expiresIn: data.expiresIn });
+    
+    if (!data.accessToken) {
+      console.error('[Auth] Resposta do refresh não contém accessToken');
+      return null;
+    }
+    
     updateAccessToken(data.accessToken);
     console.log('[Auth] Token renovado com sucesso');
     return data.accessToken;
@@ -204,15 +219,14 @@ async function fetchApi<T>(
     },
   });
 
-  // Tratar erro 403 (token expirado) com renovação automática
-  if (response.status === 403 && retryOnUnauthorized) {
-    const errorData = await response.json().catch(() => ({}));
-    const isTokenError = errorData.message?.toLowerCase().includes('token') ||
-                         errorData.message?.toLowerCase().includes('expirado') ||
-                         errorData.message?.toLowerCase().includes('expired');
+  // Tratar erro 401/403 (token inválido/expirado) com renovação automática
+  // Tenta refresh em QUALQUER 401/403 se temos refresh token e retry está habilitado
+  if ((response.status === 401 || response.status === 403) && retryOnUnauthorized) {
+    const hasRefreshToken = !!getRefreshToken();
     
-    if (isTokenError) {
-      console.log('[Auth] Token expirado, tentando renovar...');
+    // Se temos refresh token, tentar renovar antes de desistir
+    if (hasRefreshToken) {
+      console.log('[Auth] Recebido', response.status, '- tentando renovar token...');
       
       // Evitar múltiplas renovações simultâneas
       if (!isRefreshing) {
@@ -233,9 +247,17 @@ async function fetchApi<T>(
         if (onForceLogout) {
           onForceLogout();
         }
-        throw new ApiError('Sessão expirada. Faça login novamente.', 403, 'SESSION_EXPIRED');
+        throw new ApiError('Sessão expirada. Faça login novamente.', response.status, 'SESSION_EXPIRED');
       }
     }
+    
+    // Sem refresh token, retornar erro normalmente
+    const errorData = await response.json().catch(() => ({}));
+    throw new ApiError(
+      errorData.message || errorData.error || `HTTP error! status: ${response.status}`,
+      response.status,
+      errorData.code
+    );
   }
 
   if (!response.ok) {

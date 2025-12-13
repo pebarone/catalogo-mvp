@@ -287,10 +287,20 @@ paths:
               schema:
                 type: object
                 properties:
-                  token:
+                  accessToken:
                     type: string
-                    description: Token JWT para autenticação
+                    description: Token de acesso (curta duração - 15 min)
                     example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  refreshToken:
+                    type: string
+                    description: Token de atualização (longa duração - 7 dias)
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  expiresIn:
+                    type: string
+                    description: Tempo de expiração do access token
+                    example: "15m"
+                  user:
+                    $ref: "#/components/schemas/User"
         "400":
           description: Dados inválidos
           content:
@@ -307,6 +317,64 @@ paths:
                 $ref: "#/components/schemas/Error"
               example:
                 error: "Credenciais inválidas"
+        "500":
+          description: Erro interno do servidor
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /auth/refresh:
+    post:
+      tags:
+        - Autenticação
+      summary: Renovar Access Token
+      description: Usa um Refresh Token válido para obter um novo Access Token sem necessidade de login.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
+                  description: O Refresh Token recebido no login
+                  example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+      responses:
+        "200":
+          description: Token renovado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken:
+                    type: string
+                    description: Novo Token de acesso
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                  expiresIn:
+                    type: string
+                    description: Tempo de expiração do novo access token
+                    example: "15m"
+        "400":
+          description: Refresh token não fornecido ou inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Refresh token é obrigatório"
+        "401":
+          description: Refresh token expirado ou inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+              example:
+                error: "Refresh token inválido ou expirado"
         "500":
           description: Erro interno do servidor
           content:
