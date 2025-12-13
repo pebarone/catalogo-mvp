@@ -713,6 +713,85 @@ const BulkProductModal = ({ isOpen, onClose, onSave }: BulkProductModalProps) =>
   );
 };
 
+// Mobile Action Modal (Bottom Sheet)
+interface MobileActionModalProps {
+  isOpen: boolean;
+  product: Product | null;
+  onClose: () => void;
+  onEdit: (product: Product) => void;
+  onDelete: (product: Product) => void;
+  onToggleFeatured: (product: Product) => void;
+}
+
+const MobileActionModal = ({ isOpen, product, onClose, onEdit, onDelete, onToggleFeatured }: MobileActionModalProps) => {
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = '';
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  if (!isOpen || !product) return null;
+
+  return createPortal(
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+            className={styles.bottomSheetOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={(e) => e.target === e.currentTarget && onClose()}
+        >
+            <motion.div 
+                className={styles.bottomSheet}
+                initial={{ y: "100%" }}
+                animate={{ y: 0 }}
+                exit={{ y: "100%" }}
+                transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            >
+                <div className={styles.sheetHeader}>
+                    <img 
+                        src={product.image_url || '/placeholder.jpg'} 
+                        alt={product.name} 
+                        className={styles.sheetImage}
+                    />
+                    <div className={styles.sheetInfo}>
+                        <h3>{product.name}</h3>
+                        <p>{product.category}</p>
+                        <p style={{ fontWeight: 'bold', color: 'var(--color-green)', marginTop: '0.25rem' }}>
+                            R$ {Number(product.price).toFixed(2)}
+                        </p>
+                    </div>
+                </div>
+
+                <div className={styles.sheetActions}>
+                    <button className={`${styles.sheetBtn} ${styles.edit}`} onClick={() => { onEdit(product); onClose(); }}>
+                        <IconEdit size={20} />
+                        Editar Produto
+                    </button>
+                    
+                    <button className={`${styles.sheetBtn} ${styles.featured}`} onClick={() => { onToggleFeatured(product); onClose(); }}>
+                        <IconStar size={20} fill={product.is_featured ? "currentColor" : "none"} />
+                        {product.is_featured ? 'Remover dos Destaques' : 'Adicionar aos Destaques'}
+                    </button>
+
+                    <button className={`${styles.sheetBtn} ${styles.delete}`} onClick={() => { onDelete(product); onClose(); }}>
+                        <IconDelete size={20} />
+                        Excluir Produto
+                    </button>
+
+                    <button className={`${styles.sheetBtn} ${styles.cancel}`} onClick={onClose}>
+                        Cancelar
+                    </button>
+                </div>
+            </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+};
+
 // Componente principal Admin
 export const Admin = () => {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -751,6 +830,7 @@ export const Admin = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [isBulkProductModalOpen, setIsBulkProductModalOpen] = useState(false);
+  const [mobileActionProduct, setMobileActionProduct] = useState<Product | null>(null);
   
   const toast = useToast();
 
@@ -1138,6 +1218,7 @@ export const Admin = () => {
           </div>
         ) : (
           <>
+            <div className={styles.desktopTable}>
             <table className={styles.table}>
               <thead>
                 <tr>
@@ -1251,6 +1332,42 @@ export const Admin = () => {
                 ))}
               </motion.tbody>
             </table>
+            </div>
+
+            {/* Mobile List View */}
+            <div className={styles.mobileList}>
+              {displayedProducts.map((product) => (
+                <motion.div 
+                  key={product.id}
+                  className={styles.mobileListItem}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  onClick={() => setMobileActionProduct(product)}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <img 
+                    src={product.image_url || '/placeholder.jpg'} 
+                    alt={product.name} 
+                    className={styles.mobileProductImage}
+                  />
+                  <div className={styles.mobileProductInfo}>
+                    <div className={styles.mobileProductHeader}>
+                      <h4 className={styles.mobileProductName}>{product.name}</h4>
+                      <span className={styles.mobileProductPrice}>R$ {Number(product.price).toFixed(2)}</span>
+                    </div>
+                    <div className={styles.mobileProductMeta}>
+                       <span className={styles.categoryBadge} style={{ fontSize: '0.7rem', padding: '0.15rem 0.5rem' }}>{product.category}</span>
+                       {product.is_featured && (
+                         <span style={{ display: 'flex', alignItems: 'center', gap: '2px', color: '#ff9800', fontSize: '0.75rem', fontWeight: 600 }}>
+                           <IconStar size={12} fill="#ff9800" color="#ff9800" />
+                           Destaque
+                         </span>
+                       )}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
 
             {/* Pagination Controls */}
             <div className={styles.pagination}>
@@ -1308,6 +1425,18 @@ export const Admin = () => {
         isOpen={isBulkProductModalOpen}
         onClose={() => setIsBulkProductModalOpen(false)}
         onSave={handleBulkSave}
+      />
+
+      <MobileActionModal
+        isOpen={!!mobileActionProduct}
+        product={mobileActionProduct}
+        onClose={() => setMobileActionProduct(null)}
+        onEdit={(p) => {
+            setEditingProduct(p);
+            setIsProductModalOpen(true);
+        }}
+        onDelete={(p) => setDeleteProduct(p)}
+        onToggleFeatured={handleToggleFeatured}
       />
 
       <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />

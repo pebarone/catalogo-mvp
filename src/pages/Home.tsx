@@ -201,16 +201,20 @@ export const Home = () => {
         ) : featuredProducts.length > 0 ? (
           <div className={styles.carouselContainer}>
             {/* Grid responsivo com produtos */}
-            <div className={styles.grid}>
-              <AnimatePresence mode="wait">
+            {/* Grid responsivo com produtos */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentSlide}
+                className={styles.grid}
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -50 }}
+                transition={{ duration: 0.5, ease: "easeInOut" }}
+              >
                 {getCurrentProducts().map((product) => (
                   <Link to={`/produto/${product.id}`} key={product.id} className={styles.cardLink}>
                     <motion.div 
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
                       whileHover="hover"
-                      transition={{ duration: 0.3 }}
                       className={styles.card}
                       variants={{
                         hover: { y: -10, boxShadow: "0 20px 40px rgba(0,0,0,0.1)" }
@@ -247,8 +251,8 @@ export const Home = () => {
                     </motion.div>
                   </Link>
                 ))}
-              </AnimatePresence>
-            </div>
+              </motion.div>
+            </AnimatePresence>
 
             {/* Indicadores de página */}
             {maxSlides > 1 && (

@@ -38,9 +38,15 @@ export interface UserList {
 }
 
 export interface LoginResponse {
-  token: string;
-  user?: User;
-  is_admin?: boolean; // Mantido para compatibilidade
+  accessToken: string;
+  refreshToken: string;
+  expiresIn: string;
+  user: User;
+}
+
+export interface RefreshResponse {
+  accessToken: string;
+  expiresIn: string;
 }
 
 export interface Favorite {
@@ -50,12 +56,54 @@ export interface Favorite {
   created_at: string;
 }
 
-// Helper para obter o token do localStorage de forma segura
+// Chaves de armazenamento de tokens
+const ACCESS_TOKEN_KEY = 'auth_access_token';
+const REFRESH_TOKEN_KEY = 'auth_refresh_token';
+
+// Helper para obter o access token do localStorage de forma segura
 const getAuthToken = (): string | null => {
   try {
-    return localStorage.getItem('auth_token');
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
   } catch {
     return null;
+  }
+};
+
+// Helper para obter o refresh token
+const getRefreshToken = (): string | null => {
+  try {
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
+  } catch {
+    return null;
+  }
+};
+
+// Helper para salvar tokens
+const saveTokens = (accessToken: string, refreshToken: string): void => {
+  try {
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  } catch (error) {
+    console.error('[Auth] Erro ao salvar tokens:', error);
+  }
+};
+
+// Helper para atualizar apenas o access token
+const updateAccessToken = (accessToken: string): void => {
+  try {
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+  } catch (error) {
+    console.error('[Auth] Erro ao atualizar access token:', error);
+  }
+};
+
+// Helper para limpar tokens
+export const clearTokens = (): void => {
+  try {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+  } catch (error) {
+    console.error('[Auth] Erro ao limpar tokens:', error);
   }
 };
 
@@ -84,11 +132,59 @@ export class ApiError extends Error {
   }
 }
 
-// Função genérica para fazer requisições com cache
+// Flag para evitar múltiplas tentativas de refresh simultâneas
+let isRefreshing = false;
+let refreshPromise: Promise<string | null> | null = null;
+
+// Callback para notificar sobre logout forçado (será setado pelo AuthContext)
+let onForceLogout: (() => void) | null = null;
+
+export const setForceLogoutCallback = (callback: () => void): void => {
+  onForceLogout = callback;
+};
+
+/**
+ * Tenta renovar o access token usando o refresh token
+ * @returns Novo access token ou null se falhar
+ */
+async function tryRefreshToken(): Promise<string | null> {
+  const refreshToken = getRefreshToken();
+  
+  if (!refreshToken) {
+    console.warn('[Auth] Sem refresh token disponível');
+    return null;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!response.ok) {
+      console.warn('[Auth] Refresh token expirado ou inválido');
+      return null;
+    }
+
+    const data: RefreshResponse = await response.json();
+    updateAccessToken(data.accessToken);
+    console.log('[Auth] Token renovado com sucesso');
+    return data.accessToken;
+  } catch (error) {
+    console.error('[Auth] Erro ao renovar token:', error);
+    return null;
+  }
+}
+
+// Função genérica para fazer requisições com cache e renovação automática de token
 async function fetchApi<T>(
   endpoint: string,
   options: RequestInit = {},
-  useCache = false
+  useCache = false,
+  retryOnUnauthorized = true
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   
@@ -107,6 +203,40 @@ async function fetchApi<T>(
       ...options.headers,
     },
   });
+
+  // Tratar erro 403 (token expirado) com renovação automática
+  if (response.status === 403 && retryOnUnauthorized) {
+    const errorData = await response.json().catch(() => ({}));
+    const isTokenError = errorData.message?.toLowerCase().includes('token') ||
+                         errorData.message?.toLowerCase().includes('expirado') ||
+                         errorData.message?.toLowerCase().includes('expired');
+    
+    if (isTokenError) {
+      console.log('[Auth] Token expirado, tentando renovar...');
+      
+      // Evitar múltiplas renovações simultâneas
+      if (!isRefreshing) {
+        isRefreshing = true;
+        refreshPromise = tryRefreshToken();
+      }
+      
+      const newToken = await refreshPromise;
+      isRefreshing = false;
+      refreshPromise = null;
+      
+      if (newToken) {
+        // Refazer a requisição com o novo token (sem retry para evitar loop)
+        return fetchApi<T>(endpoint, options, useCache, false);
+      } else {
+        // Refresh falhou, forçar logout
+        clearTokens();
+        if (onForceLogout) {
+          onForceLogout();
+        }
+        throw new ApiError('Sessão expirada. Faça login novamente.', 403, 'SESSION_EXPIRED');
+      }
+    }
+  }
 
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
@@ -149,6 +279,9 @@ export const isValidEmail = (email: string): boolean => {
 };
 
 export const authApi = {
+  /**
+   * Realiza login e salva tokens
+   */
   login: async (email: string, password: string): Promise<LoginResponse> => {
     // Validar email antes de enviar
     if (!isValidEmail(email)) {
@@ -158,8 +291,30 @@ export const authApi = {
     const response = await fetchApi<LoginResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
-    });
+    }, false, false); // Sem cache, sem retry (é a autenticação inicial)
+    
+    // Salvar tokens automaticamente
+    saveTokens(response.accessToken, response.refreshToken);
+    
     return response;
+  },
+
+  /**
+   * Renova o access token usando o refresh token
+   */
+  refresh: async (): Promise<RefreshResponse | null> => {
+    const newToken = await tryRefreshToken();
+    if (newToken) {
+      return { accessToken: newToken, expiresIn: '15m' };
+    }
+    return null;
+  },
+
+  /**
+   * Realiza logout limpando tokens
+   */
+  logout: (): void => {
+    clearTokens();
   },
 
   register: async (email: string, password: string): Promise<{ message: string; user: User }> => {

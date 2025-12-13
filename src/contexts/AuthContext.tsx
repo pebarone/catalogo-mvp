@@ -1,6 +1,6 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { ReactNode } from 'react';
-import { authApi, ApiError } from '../services/api';
+import { authApi, ApiError, setForceLogoutCallback, clearTokens } from '../services/api';
 import type { User } from '../services/api';
 
 // Tipos
@@ -19,8 +19,9 @@ interface AuthContextType {
 // Contexto
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Chaves do localStorage
-const TOKEN_KEY = 'auth_token';
+// Chaves do localStorage (devem corresponder às do api.ts)
+const ACCESS_TOKEN_KEY = 'auth_access_token';
+const REFRESH_TOKEN_KEY = 'auth_refresh_token';
 const USER_KEY = 'auth_user';
 
 /**
@@ -97,21 +98,39 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Função de logout interna (usada pelo callback de forceLogout)
+  const performLogout = useCallback(() => {
+    clearTokens();
+    localStorage.removeItem(USER_KEY);
+    setUser(null);
+    setIsAdmin(false);
+    setError(null);
+  }, []);
+
+  // Registrar callback de logout forçado na API
+  useEffect(() => {
+    setForceLogoutCallback(() => {
+      console.log('[Auth] Logout forçado - refresh token expirado');
+      performLogout();
+    });
+  }, [performLogout]);
+
   // Carregar dados do localStorage na inicialização
   useEffect(() => {
     const loadStoredAuth = () => {
       try {
-        const storedToken = localStorage.getItem(TOKEN_KEY);
+        const storedAccessToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+        const storedRefreshToken = localStorage.getItem(REFRESH_TOKEN_KEY);
         const storedUser = localStorage.getItem(USER_KEY);
 
-        if (storedToken && storedUser) {
-          // Verificar se o token não expirou
-          if (!isTokenExpired(storedToken)) {
+        if (storedAccessToken && storedRefreshToken && storedUser) {
+          // Verificar se o access token não expirou
+          if (!isTokenExpired(storedAccessToken)) {
             const parsedUser = JSON.parse(storedUser);
             setUser(parsedUser);
             
             // Decodificar token para verificar se é admin
-            const payload = decodeJwtPayload(storedToken);
+            const payload = decodeJwtPayload(storedAccessToken);
             
             const hasAdminRole = 
               payload?.is_admin === true || 
@@ -120,15 +139,27 @@ export function AuthProvider({ children }: AuthProviderProps) {
               (payload?.roles as string[])?.includes('admin');
 
             setIsAdmin(!!hasAdminRole);
+          } else if (storedRefreshToken) {
+            // Access token expirado, mas temos refresh token
+            // O token será renovado automaticamente na próxima requisição
+            // Por ora, manter o usuário como logado
+            const parsedUser = JSON.parse(storedUser);
+            setUser(parsedUser);
+            
+            // Verificar role do usuário salvo
+            const hasAdminRole = parsedUser.role === 'admin';
+            setIsAdmin(!!hasAdminRole);
+            
+            console.log('[Auth] Access token expirado, será renovado na próxima requisição');
           } else {
-            // Token expirado, limpar dados
-            localStorage.removeItem(TOKEN_KEY);
+            // Sem refresh token, limpar dados
+            clearTokens();
             localStorage.removeItem(USER_KEY);
           }
         }
       } catch (err) {
         console.error('Erro ao carregar autenticação:', err);
-        localStorage.removeItem(TOKEN_KEY);
+        clearTokens();
         localStorage.removeItem(USER_KEY);
       } finally {
         setIsLoading(false);
@@ -145,26 +176,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const response = await authApi.login(email, password);
       
-      // Salvar token
-      localStorage.setItem(TOKEN_KEY, response.token);
+      // Os tokens já são salvos automaticamente pelo authApi.login
+      // Agora só precisamos salvar o usuário e atualizar o estado
       
-      // Decodificar payload para obter informações do usuário
-      const payload = decodeJwtPayload(response.token);
-      
-      const userData: User = response.user || {
-        id: payload?.sub as string || '',
-        email: payload?.email as string || email,
-        role: (payload?.is_admin === true || response.is_admin === true) ? 'admin' : 'user',
-      };
+      const userData: User = response.user;
 
       localStorage.setItem(USER_KEY, JSON.stringify(userData));
       
       setUser(userData);
       
       // Verificação robusta de admin
+      const payload = decodeJwtPayload(response.accessToken);
       const hasAdminRole = 
         payload?.is_admin === true || 
-        response.is_admin === true || 
         userData.role === 'admin' ||
         payload?.role === 'admin' ||
         (payload?.roles as string[])?.includes('admin');
@@ -214,12 +238,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [login]);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
-    localStorage.removeItem(USER_KEY);
-    setUser(null);
-    setIsAdmin(false);
-    setError(null);
-  }, []);
+    performLogout();
+  }, [performLogout]);
 
   const clearError = useCallback(() => {
     setError(null);
