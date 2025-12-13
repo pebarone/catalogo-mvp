@@ -59,6 +59,7 @@ export const Navbar = () => {
       <nav className={styles.navbar}>
         <div className={styles.container}>
           <Link to="/" className={styles.logo}>
+            <img src="/logo.png" alt="Mel Colorindo" style={{ height: '60px', width: 'auto' }} />
             <span className={styles.logoText}>Mel</span>
             <span className={styles.logoHighlight}>Colorindo</span>
           </Link>

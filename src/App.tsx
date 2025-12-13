@@ -53,12 +53,42 @@ const ScrollToTop = () => {
   return null;
 };
 
+const TitleUpdater = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const path = location.pathname;
+    const baseTitle = "Mel Colorindo";
+    
+    let pageTitle = "Início";
+    
+    if (path === '/produtos') {
+      pageTitle = "Produtos";
+    } else if (path.startsWith('/produto/')) {
+      pageTitle = "Detalhes do Produto";
+    } else if (path === '/favoritos') {
+      pageTitle = "Favoritos";
+    } else if (path === '/sobre') {
+      pageTitle = "Sobre";
+    } else if (path === '/contato') {
+      pageTitle = "Contato";
+    } else if (path === '/admin') {
+      pageTitle = "Admin";
+    }
+
+    document.title = `${baseTitle} | ${pageTitle}`;
+  }, [location]);
+
+  return null;
+};
+
 function App() {
   return (
     <AuthProvider>
       <FavoritesProvider>
         <BrowserRouter>
           <ScrollToTop />
+          <TitleUpdater />
           <Suspense fallback={<PageLoader />}>
             <Routes>
               <Route path="/" element={<Layout />}>
