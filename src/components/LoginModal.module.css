@@ -13,6 +13,9 @@
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
+  /* Otimizações para evitar flickering em mobile durante mudanças de estado */
+  isolation: isolate;
+  contain: layout style;
 }
 
 .modal {
@@ -27,6 +30,11 @@
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25),
     0 0 0 1px rgba(255, 255, 255, 0.1);
   overflow: hidden;
+  /* Força camada de composição separada para isolar renderização */
+  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  will-change: transform, opacity;
 }
 
 .modal::before {
@@ -471,5 +479,27 @@
   .iconWrapper svg {
     width: 28px;
     height: 28px;
+  }
+}
+
+/* Otimizações para dispositivos móveis reais (touch screen) */
+/* Reduz efeitos pesados que causam flickering em hardware móvel */
+@media (max-width: 768px) and (pointer: coarse) {
+  .overlay {
+    /* Reduz intensidade do blur em dispositivos móveis touch */
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+  
+  .modal {
+    /* Otimizações específicas para mobile */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+  
+  /* Desabilita transições não essenciais durante re-renderização */
+  .modalContent * {
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 }

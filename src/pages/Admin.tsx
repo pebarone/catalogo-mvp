@@ -296,47 +296,50 @@ const ProductModal = ({ isOpen, product, onClose, onSave }: ProductModalProps) =
 
                 <div className={modalStyles.inputGroup}>
                   <label>Imagem</label>
-                  {imagePreview ? (
-                    <div className={styles.imagePreview} style={{ marginTop: '0.5rem' }}>
-                      <img src={imagePreview} alt="Preview" />
-                      <button
-                        type="button"
-                        className={styles.removeImage}
-                        onClick={() => {
-                          setImageFile(null);
-                          setImagePreview(null);
-                        }}
-                        aria-label="Remover imagem"
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  ) : (
-                    <div className={styles.uploadOptions} style={{ display: 'flex', gap: '1rem' }}>
-                      <label className={styles.imageUpload} style={{ background: 'white', flex: 1, cursor: 'pointer' }}>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={handleImageChange}
-                          style={{ display: 'none' }}
-                        />
-                        <IconUpload size={32} color="#999" />
-                        <p>Abrir <span>Galeria</span></p>
-                      </label>
-                      
-                      <label className={styles.imageUpload} style={{ background: 'white', flex: 1, cursor: 'pointer' }}>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          capture="environment"
-                          onChange={handleImageChange}
-                          style={{ display: 'none' }}
-                        />
-                        <IconCamera size={32} color="#999" />
-                        <p>Tirar <span>Foto</span></p>
-                      </label>
-                    </div>
-                  )}
+                  {/* Contêiner estável para evitar flickering durante transição upload/preview */}
+                  <div style={{ minHeight: '150px', marginTop: '0.5rem', contain: 'layout style' }}>
+                    {imagePreview ? (
+                      <div key="image-preview" className={styles.imagePreview}>
+                        <img src={imagePreview} alt="Preview" />
+                        <button
+                          type="button"
+                          className={styles.removeImage}
+                          onClick={() => {
+                            setImageFile(null);
+                            setImagePreview(null);
+                          }}
+                          aria-label="Remover imagem"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ) : (
+                      <div key="upload-options" className={styles.uploadOptions} style={{ display: 'flex', gap: '1rem' }}>
+                        <label className={styles.imageUpload} style={{ background: 'white', flex: 1, cursor: 'pointer' }}>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={handleImageChange}
+                            style={{ display: 'none' }}
+                          />
+                          <IconUpload size={32} color="#999" />
+                          <p>Abrir <span>Galeria</span></p>
+                        </label>
+                        
+                        <label className={styles.imageUpload} style={{ background: 'white', flex: 1, cursor: 'pointer' }}>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            onChange={handleImageChange}
+                            style={{ display: 'none' }}
+                          />
+                          <IconCamera size={32} color="#999" />
+                          <p>Tirar <span>Foto</span></p>
+                        </label>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <button
