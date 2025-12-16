@@ -361,9 +361,12 @@
   transition: all 0.2s ease;
 }
 
-.categoryBtn:hover {
-  background: var(--color-blue-light);
-  color: var(--color-blue);
+/* Hover apenas para dispositivos com mouse */
+@media (hover: hover) and (pointer: fine) {
+  .categoryBtn:hover {
+    background: var(--color-blue-light);
+    color: var(--color-blue);
+  }
 }
 
 .categoryBtn.active {
@@ -383,9 +386,12 @@
   transition: all 0.2s ease;
 }
 
-.subcategoryBtn:hover {
-  background: var(--color-blue);
-  color: white;
+/* Hover apenas para dispositivos com mouse - evita "sticky hover" em touch */
+@media (hover: hover) and (pointer: fine) {
+  .subcategoryBtn:hover {
+    background: var(--color-blue);
+    color: white;
+  }
 }
 
 .subcategoryBtn.active {
