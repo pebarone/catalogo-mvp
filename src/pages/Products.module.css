@@ -49,8 +49,8 @@
   color: #555;
   font-weight: 600;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  transform: translateZ(0);
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -97,9 +97,7 @@
   flex-direction: column;
   flex: 1;
   position: relative;
-  contain: layout style;
-  will-change: transform;
-  transform: translateZ(0); 
+  transform-style: preserve-3d;
 }
 
 .cardImageWrapper {
@@ -177,7 +175,7 @@
   flex: 1;
   height: 48px;
   border-radius: 12px;
-  background: #25D366;
+  background: #25d366;
   color: white;
   display: flex;
   align-items: center;
@@ -185,18 +183,17 @@
   cursor: pointer;
   transition: transform 0.2s ease, background-color 0.2s ease;
   text-decoration: none;
-  transform: translateZ(0);
-  will-change: transform;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .whatsappBtn {
     box-shadow: 0 2px 10px rgba(37, 211, 102, 0.2);
-    transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, background-color 0.2s ease,
+      box-shadow 0.2s ease;
   }
-  
+
   .whatsappBtn:hover {
-    transform: translateY(-2px) translateZ(0);
+    transform: translateY(-2px);
     background: #20b356;
     box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
   }
@@ -214,19 +211,19 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
-  transform: translateZ(0);
-  will-change: transform;
+  transition: transform 0.2s ease, background-color 0.2s ease,
+    border-color 0.2s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .favoriteBtn {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, background-color 0.2s ease,
+      border-color 0.2s ease, box-shadow 0.2s ease;
   }
-  
+
   .favoriteBtn:hover {
-    transform: translateY(-2px) translateZ(0);
+    transform: translateY(-2px);
     background: white;
     border-color: var(--color-red);
     box-shadow: 0 4px 15px rgba(255, 89, 94, 0.2);
@@ -243,7 +240,7 @@
   .favoriteBtn.favoriteActive {
     box-shadow: 0 4px 15px rgba(255, 89, 94, 0.3);
   }
-  
+
   .favoriteBtn.favoriteActive:hover {
     background: #c0392b;
     border-color: #c0392b;
@@ -346,7 +343,6 @@
   font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease;
-  transform: translateZ(0);
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -463,21 +459,21 @@
   font-weight: 600;
   color: #333;
   cursor: pointer;
-  transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  transform: translateZ(0);
-  will-change: transform;
+  transition: transform 0.2s ease, background-color 0.2s ease,
+    border-color 0.2s ease, color 0.2s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
   .pageBtn {
-    transition: transform 0.2s ease, background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, background-color 0.2s ease,
+      border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
   }
-  
+
   .pageBtn:hover:not(:disabled) {
     background: var(--color-blue);
     color: white;
     border-color: var(--color-blue);
-    transform: translateY(-2px) translateZ(0);
+    transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(25, 130, 196, 0.2);
   }
 }
@@ -505,8 +501,8 @@
   font-weight: 600;
   color: #333;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
-  transform: translateZ(0);
+  transition: background-color 0.2s ease, border-color 0.2s ease,
+    color 0.2s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {

@@ -33,9 +33,7 @@ export const Layout = () => {
           exit={pageTransition.exit}
           transition={pageTransition.transition}
           style={{
-            willChange: 'transform, opacity',
-            transform: 'translateZ(0)',
-            backfaceVisibility: 'hidden',
+            width: '100%',
           }}
         >
           <Outlet />

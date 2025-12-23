@@ -32,7 +32,7 @@ export const Contact = () => {
           </motion.a>
 
           <motion.a 
-            href="mailto:contato@mel.com" 
+            href="mailto:melcolorindo@gmail.com" 
             className={styles.linkItem}
             whileHover={{ x: 5, backgroundColor: "white", borderColor: "var(--color-blue-light)", boxShadow: "0 10px 20px rgba(0,0,0,0.05)" }}
             transition={{ duration: 0.2 }}
@@ -42,12 +42,12 @@ export const Contact = () => {
             </div>
             <div>
               <h3>Email</h3>
-              <p>contato@mel.com</p>
+              <p>melcolorindo@gmail.com</p>
             </div>
           </motion.a>
 
           <motion.a 
-            href="https://wa.me/5511972969552" 
+            href="https://wa.me/5511997967401" 
             target="_blank" 
             rel="noopener noreferrer" 
             className={styles.linkItem}
@@ -59,7 +59,7 @@ export const Contact = () => {
             </div>
             <div>
               <h3>WhatsApp</h3>
-              <p>(11) 97296-9552</p>
+              <p>+55 (11) 99796-7401</p>
             </div>
           </motion.a>
         </div>

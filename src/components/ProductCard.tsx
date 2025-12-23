@@ -34,7 +34,7 @@ export const ProductCard = memo(({ product, isFavorite, onFavoriteToggle }: Prod
   }, [product.id, onFavoriteToggle]);
 
   const generateWhatsAppLink = useCallback(() => {
-    const phone = '5511972969552';
+    const phone = '5511997967401';
     const baseUrl = import.meta.env.VITE_URL_PREFIX || window.location.origin;
     const productLink = `${baseUrl}/produto/${product.id}`;
     
