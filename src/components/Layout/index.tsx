@@ -1,8 +1,8 @@
 import { Outlet } from 'react-router-dom';
-import { Navbar } from './Navbar';
-import { Footer } from './Footer';
+import { Navbar } from '../Navbar';
+import { Footer } from '../Footer';
 import { motion } from 'motion/react';
-import { useShouldReduceAnimations } from '../hooks/useIsMobile';
+import { useShouldReduceAnimations } from '../../hooks/useIsMobile';
 
 export const Layout = () => {
   const shouldReduceAnimations = useShouldReduceAnimations();

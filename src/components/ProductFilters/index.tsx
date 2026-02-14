@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { IconFilter, IconClose, IconCheck, IconChevronDown } from './Icons';
-import { useMobileAnimations } from '../hooks/useMobileAnimations';
-import type { CategoryInfo } from '../services/api';
-import type { SortOption } from '../hooks/useProductFilters';
+import { IconFilter, IconClose, IconCheck, IconChevronDown } from '../Icons';
+import { useMobileAnimations } from '../../hooks/useMobileAnimations';
+import type { CategoryInfo } from '../../services/api';
+import type { SortOption } from '../../hooks/useProductFilters';
 import styles from './ProductFilters.module.css';
 
 interface ProductFiltersProps {

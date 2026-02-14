@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { IconHeart } from '../components/Icons';
+import { IconHeart } from '../../components/Icons';
 import styles from './About.module.css';
 
 export const About = () => {

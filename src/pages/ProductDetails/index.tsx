@@ -1,18 +1,24 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { productsApi, favoritesApi } from '../services/api';
-import type { Product } from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
-import { IconArrowLeft, IconHeart, IconWhatsapp, IconEdit } from '../components/Icons';
+import { productsApi, favoritesApi } from '../../services/api';
+import type { Product } from '../../services/api';
+import { useAuth } from '../../contexts/AuthContext';
+import { IconArrowLeft, IconHeart, IconWhatsapp, IconEdit } from '../../components/Icons';
 import styles from './ProductDetails.module.css';
 
 export const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
-  const backPath = location.state?.from === '/favoritos' ? '/favoritos' : '/produtos';
-  const backText = location.state?.from === '/favoritos' ? 'Voltar para favoritos' : 'Voltar para produtos';
+  const state = location.state as { from?: string; search?: string } | null;
+  
+  const isFromFavorites = state?.from === '/favoritos';
+  const backPath = isFromFavorites 
+    ? '/favoritos' 
+    : `/produtos${state?.search || ''}`; // Append filters if returning to products
+    
+  const backText = isFromFavorites ? 'Voltar para favoritos' : 'Voltar para produtos';
   const { isAuthenticated, isAdmin } = useAuth();
   const [product, setProduct] = useState<Product | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,17 +42,20 @@ export const ProductDetails = () => {
       if (!id) return;
 
       try {
-        const data = await productsApi.getById(id);
-        setProduct(data);
+        const productPromise = productsApi.getById(id);
+        const favoritePromise = isAuthenticated 
+          ? favoritesApi.check(id).catch(() => null) 
+          : Promise.resolve(null);
 
-        // Verificar se é favorito (se autenticado)
-        if (isAuthenticated) {
-          try {
-            const { isFavorite: fav } = await favoritesApi.check(id);
-            setIsFavorite(fav);
-          } catch {
-            // Ignora erro de favoritos
-          }
+        const [productData, favoriteData] = await Promise.all([
+          productPromise,
+          favoritePromise
+        ]);
+
+        setProduct(productData);
+
+        if (favoriteData) {
+          setIsFavorite(favoriteData.isFavorite);
         }
       } catch (error) {
         console.error('Erro ao carregar produto:', error);
@@ -85,7 +94,7 @@ export const ProductDetails = () => {
     }
   };
 
-  const generateWhatsAppLink = () => {
+  const generateWhatsAppLink = useCallback(() => {
     if (!product) return '#';
     const phone = '5511997967401';
     const baseUrl = import.meta.env.VITE_URL_PREFIX || window.location.origin;
@@ -95,7 +104,7 @@ export const ProductDetails = () => {
       `Olá! Tenho interesse no produto: ${product.name} - R$ ${Number(product.price).toFixed(2)}\n${productLink}`
     );
     return `https://wa.me/${phone}?text=${message}`;
-  };
+  }, [product]);
 
   if (isLoading) {
     return (

@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { useFavorites } from '../contexts/FavoritesContext';
-import { IconHeart, IconHeartFilled, IconAlertCircle } from '../components/Icons';
+import { useFavorites } from '../../contexts/FavoritesContext';
+import { IconHeart, IconHeartFilled, IconAlertCircle } from '../../components/Icons';
 import styles from './Favorites.module.css';
-import { getSubcategoryColor } from '../utils/subcategoryColors';
+import { getSubcategoryColor } from '../../utils/subcategoryColors';
 
 // Constantes de animação movidas para fora do componente para evitar recriação
 const containerVariants = {

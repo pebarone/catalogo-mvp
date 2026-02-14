@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { IconMail, IconKey, IconEye, IconEyeOff, IconAlertCircle, IconLogin } from './Icons';
-import { useAuth } from '../contexts/AuthContext';
-import { isValidEmail } from '../services/api';
-import { useMobileAnimations } from '../hooks/useMobileAnimations';
+import { IconMail, IconKey, IconEye, IconEyeOff, IconAlertCircle, IconLogin } from '../Icons';
+import { useAuth } from '../../contexts/AuthContext';
+import { isValidEmail } from '../../services/api';
+import { useMobileAnimations } from '../../hooks/useMobileAnimations';
 import styles from './LoginModal.module.css';
 
 interface LoginModalProps {

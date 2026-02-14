@@ -1,23 +1,49 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Link } from 'react-router-dom';
-import { IconArrowRight } from '../components/Icons';
+import { IconArrowRight } from '../../components/Icons';
 import styles from './Home.module.css';
-import { productsApi } from '../services/api';
-import type { Product } from '../services/api';
-import { getSubcategoryColor } from '../utils/subcategoryColors';
-import { useMobileAnimations } from '../hooks/useMobileAnimations';
+import { productsApi } from '../../services/api';
+import type { Product } from '../../services/api';
+import { getSubcategoryColor } from '../../utils/subcategoryColors';
+import { useMobileAnimations } from '../../hooks/useMobileAnimations';
 
 const MotionLink = motion.create(Link);
+
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 300 : -300,
+    opacity: 0
+  }),
+  center: {
+    zIndex: 1,
+    x: 0,
+    opacity: 1
+  },
+  exit: (direction: number) => ({
+    zIndex: 0,
+    x: direction < 0 ? 300 : -300,
+    opacity: 0
+  })
+};
+
+const swipeConfidenceThreshold = 10000;
+const swipePower = (offset: number, velocity: number) => {
+  return Math.abs(offset) * velocity;
+};
 
 export const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [itemsPerSlide, setItemsPerSlide] = useState(3); // Desktop: 3, Mobile: 1
   const [[page, direction], setPage] = useState([0, 0]); // [currentSlide, direction]
   
+  // Animações otimizadas para mobile
+  const { skeletonTransition, prefersReducedMotion, isMobile } = useMobileAnimations();
+  const itemsPerSlide = isMobile ? 1 : 3;
+
   // Helper para pre-carregar imagens
   const preloadImages = async (products: Product[]) => {
+    // ... logic remains but function is inside component? efficient enough.
     const promises = products.map((product) => {
       return new Promise((resolve) => {
         if (!product.image_url) {
@@ -27,7 +53,7 @@ export const Home = () => {
         const img = new Image();
         img.src = product.image_url;
         img.onload = () => resolve(true);
-        img.onerror = () => resolve(true); // Resolve mesmo com erro para não travar
+        img.onerror = () => resolve(true);
       });
     });
     return Promise.all(promises);
@@ -39,31 +65,6 @@ export const Home = () => {
     const nextSlide = (page + newDirection + maxSlides) % maxSlides;
     setPage([nextSlide, newDirection]);
   };
-  
-  // Animações otimizadas para mobile
-  const { skeletonTransition, prefersReducedMotion, isMobile } = useMobileAnimations();
-
-  // Detectar tamanho da tela para responsividade com debounce
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    
-    const handleResize = () => {
-      // Debounce de 150ms para evitar muitas recomputações
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setItemsPerSlide(window.innerWidth < 768 ? 1 : 3);
-      }, 150);
-    };
-    
-    // Verificar no mount (sem debounce)
-    setItemsPerSlide(window.innerWidth < 768 ? 1 : 3);
-    
-    window.addEventListener('resize', handleResize, { passive: true });
-    return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
 
   useEffect(() => {
     const loadFeaturedProducts = async () => {
@@ -103,29 +104,6 @@ export const Home = () => {
     const start = page * itemsPerSlide;
     const end = start + itemsPerSlide;
     return featuredProducts.slice(start, end);
-  };
-  
-  // Variantes para slide direcional
-  const slideVariants = {
-    enter: (direction: number) => ({
-      x: direction > 0 ? 300 : -300,
-      opacity: 0
-    }),
-    center: {
-      zIndex: 1,
-      x: 0,
-      opacity: 1
-    },
-    exit: (direction: number) => ({
-      zIndex: 0,
-      x: direction < 0 ? 300 : -300,
-      opacity: 0
-    })
-  };
-
-  const swipeConfidenceThreshold = 10000;
-  const swipePower = (offset: number, velocity: number) => {
-    return Math.abs(offset) * velocity;
   };
 
   return (
@@ -273,7 +251,9 @@ export const Home = () => {
                   }
                 }}
               >
-                {getCurrentProducts().map((product) => (
+                {getCurrentProducts().map((product) => {
+                  const { bg, text } = product.subcategory ? getSubcategoryColor(product.subcategory) : { bg: '#eee', text: '#333' };
+                  return (
                   <Link to={`/produto/${product.id}`} key={product.id} className={styles.cardLink}>
                     <motion.div 
                       whileHover="hover"
@@ -303,8 +283,8 @@ export const Home = () => {
                           <span 
                             className={styles.subcategory}
                             style={{
-                              backgroundColor: getSubcategoryColor(product.subcategory).bg,
-                              color: getSubcategoryColor(product.subcategory).text,
+                              backgroundColor: bg,
+                              color: text,
                             }}
                           >
                             {product.subcategory}
@@ -314,7 +294,8 @@ export const Home = () => {
                       </div>
                     </motion.div>
                   </Link>
-                ))}
+                );
+              })}
               </motion.div>
             </AnimatePresence>
 

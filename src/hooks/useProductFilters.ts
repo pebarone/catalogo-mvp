@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { productsApi, type CategoryInfo } from '../services/api';
 
 export type SortOption = 'default' | 'name-asc' | 'price-asc' | 'price-desc';
@@ -34,21 +35,27 @@ export interface UseProductFiltersReturn {
 
 /**
  * Hook para gerenciar estado de filtros de produtos
- * Carrega categorias do endpoint /products/categories e gerencia seleções
+ * Sincroniza estado com URL query parameters para persistência
  */
 export function useProductFilters(): UseProductFiltersReturn {
-  // Estado de categorias
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // Estado de categorias (sempre local, pois é dado do servidor)
   const [categories, setCategories] = useState<CategoryInfo[]>([]);
   const [isLoadingCategories, setIsLoadingCategories] = useState(true);
   
-  // Estado de filtros
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedSubcategories, setSelectedSubcategories] = useState<string[]>([]);
-  const [sortBy, setSortBy] = useState<SortOption>('default');
+  // Estado derivado dos search params
+  const selectedCategory = searchParams.get('category');
   
-  // Paginação
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(6);
+  const selectedSubcategories = useMemo(() => {
+    const sub = searchParams.get('subcategories');
+    return sub ? sub.split(',') : [];
+  }, [searchParams]);
+
+  const sortBy = (searchParams.get('sort') as SortOption) || 'default';
+  
+  const currentPage = Number(searchParams.get('page')) || 1;
+  const itemsPerPage = Number(searchParams.get('limit')) || 6;
 
   // Carregar categorias do endpoint dedicado
   useEffect(() => {
@@ -68,44 +75,80 @@ export function useProductFilters(): UseProductFiltersReturn {
     loadCategories();
   }, []);
 
-  // Resetar página ao mudar filtros
+  // Helpers para atualizar URL
+  const updateParams = useCallback((newParams: Record<string, string | null>) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      Object.entries(newParams).forEach(([key, value]) => {
+        if (value === null) {
+          next.delete(key);
+        } else {
+          next.set(key, value);
+        }
+      });
+      return next;
+    });
+  }, [setSearchParams]);
+
+  // Actions
   const setCategory = useCallback((category: string | null) => {
-    setSelectedCategory(category);
-    // Não resetamos subcategorias pois elas são independentes/globais
-    setCurrentPage(1);
-  }, []);
+    updateParams({
+      category,
+      subcategories: null, // Limpa subcategorias ao mudar categoria
+      page: '1' // Reseta página
+    });
+  }, [updateParams]);
 
   const toggleSubcategory = useCallback((subcategory: string) => {
-    setSelectedSubcategories(prev => {
-      if (prev.includes(subcategory)) {
-        return prev.filter(s => s !== subcategory);
-      }
-      return [...prev, subcategory];
+    const currentSubs = selectedSubcategories;
+    let newSubs: string[];
+    
+    if (currentSubs.includes(subcategory)) {
+      newSubs = currentSubs.filter(s => s !== subcategory);
+    } else {
+      newSubs = [...currentSubs, subcategory];
+    }
+    
+    updateParams({
+      subcategories: newSubs.length > 0 ? newSubs.join(',') : null,
+      page: '1'
     });
-    setCurrentPage(1);
-  }, []);
+  }, [selectedSubcategories, updateParams]);
+
+  const handleSetSortBy = useCallback((sort: SortOption) => {
+    updateParams({
+      sort: sort === 'default' ? null : sort,
+      page: '1'
+    });
+  }, [updateParams]);
+
+  const handleSetCurrentPage = useCallback((page: number) => {
+    updateParams({ page: page.toString() });
+  }, [updateParams]);
 
   const handleSetItemsPerPage = useCallback((count: number) => {
-    setItemsPerPage(count);
-    setCurrentPage(1);
-  }, []);
+    updateParams({
+      limit: count.toString(),
+      page: '1'
+    });
+  }, [updateParams]);
 
   const clearFilters = useCallback(() => {
-    setSelectedCategory(null);
-    setSelectedSubcategories([]);
-    setSortBy('default');
-    setCurrentPage(1);
-  }, []);
+    setSearchParams(prev => {
+      const next = new URLSearchParams();
+      // Mantém apenas itemsPerPage se desejar, ou limpa tudo para default
+      if (prev.has('limit')) next.set('limit', prev.get('limit')!);
+      return next;
+    });
+  }, [setSearchParams]);
 
-  // Helpers
+  // Helpers de dados
   const getAvailableSubcategories = useCallback((): string[] => {
-    // Se tem categoria selecionada, retorna apenas as dela
     if (selectedCategory) {
       const found = categories.find(c => c.category === selectedCategory);
       return found?.subcategories || [];
     }
     
-    // Se não, retorna TODAS as subcategorias únicas
     const allSubcategories = new Set<string>();
     categories.forEach(cat => {
       cat.subcategories.forEach(sub => allSubcategories.add(sub));
@@ -127,28 +170,19 @@ export function useProductFilters(): UseProductFiltersReturn {
   }, [selectedCategory, selectedSubcategories, sortBy]);
 
   return {
-    // Dados de categorias
     categories,
     isLoadingCategories,
-    
-    // Estado de filtros
     selectedCategory,
     selectedSubcategories,
     sortBy,
-    
-    // Paginação
     currentPage,
     itemsPerPage,
-    
-    // Actions
     setCategory,
     toggleSubcategory,
-    setSortBy,
-    setCurrentPage,
+    setSortBy: handleSetSortBy,
+    setCurrentPage: handleSetCurrentPage,
     setItemsPerPage: handleSetItemsPerPage,
     clearFilters,
-    
-    // Helpers
     getAvailableSubcategories,
     getCategoryCount,
     getTotalProductCount,

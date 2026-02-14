@@ -1,18 +1,27 @@
 import { memo, useCallback, useMemo } from 'react';
 import { motion } from 'motion/react';
-import { useNavigate } from 'react-router-dom';
-import { IconHeart, IconWhatsapp } from './Icons';
-import type { Product } from '../services/api';
-import { getSubcategoryColor } from '../utils/subcategoryColors';
-import { usePrefersReducedMotion } from '../hooks/useIsMobile';
-import { useMobileAnimations } from '../hooks/useMobileAnimations';
-import styles from '../pages/Products.module.css';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { IconHeart, IconWhatsapp } from '../Icons';
+import type { Product } from '../../services/api';
+import { getSubcategoryColor } from '../../utils/subcategoryColors';
+import { usePrefersReducedMotion } from '../../hooks/useIsMobile';
+import { useMobileAnimations } from '../../hooks/useMobileAnimations';
+import styles from '../../pages/Products/Products.module.css';
 
 interface ProductCardProps {
   product: Product;
   isFavorite: boolean;
   onFavoriteToggle: (productId: string, event: React.MouseEvent) => void;
 }
+
+const imageVariants = {
+  hover: { scale: 1.1, transition: { duration: 0.4, ease: "easeOut" as const } }
+};
+
+const cardVariants = {
+  rest: { y: 0, boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)" },
+  hover: { y: -8, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)" }
+};
 
 /**
  * Card de produto otimizado com React.memo
@@ -22,11 +31,17 @@ interface ProductCardProps {
 export const ProductCard = memo(({ product, isFavorite, onFavoriteToggle }: ProductCardProps) => {
   const prefersReducedMotion = usePrefersReducedMotion();
   const { shouldUseLayout } = useMobileAnimations();
+  const location = useLocation(); // Needed to capture current search params
   const navigate = useNavigate();
   
   const handleCardClick = useCallback(() => {
-    navigate(`/produto/${product.id}`);
-  }, [navigate, product.id]);
+    navigate(`/produto/${product.id}`, { 
+      state: { 
+        from: location.pathname, 
+        search: location.search 
+      } 
+    });
+  }, [navigate, product.id, location]);
   
   const handleFavoriteClick = useCallback((event: React.MouseEvent) => {
     event.stopPropagation();
@@ -67,10 +82,6 @@ export const ProductCard = memo(({ product, isFavorite, onFavoriteToggle }: Prod
     }
   }), [prefersReducedMotion, shouldUseLayout]);
 
-  const imageVariants = {
-    hover: { scale: 1.1, transition: { duration: 0.4, ease: "easeOut" as const } }
-  };
-
   return (
     <motion.div 
       layout
@@ -85,10 +96,7 @@ export const ProductCard = memo(({ product, isFavorite, onFavoriteToggle }: Prod
         whileHover={prefersReducedMotion ? undefined : "hover"}
         animate={prefersReducedMotion ? undefined : "rest"}
         whileTap={motionProps.whileTap}
-        variants={{
-          rest: { y: 0, boxShadow: "0 2px 8px rgba(0, 0, 0, 0.08)" },
-          hover: { y: -8, boxShadow: "0 20px 40px rgba(0, 0, 0, 0.1)" }
-        }}
+        variants={cardVariants}
         style={{ cursor: 'pointer' }}
       >
           {/* Badge de destaque */}

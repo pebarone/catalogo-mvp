@@ -167,6 +167,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 500px; 
 }
 
 .cardLink {

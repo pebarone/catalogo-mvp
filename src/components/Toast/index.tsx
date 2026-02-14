@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { IconCheck, IconAlertCircle, IconClose } from './Icons';
+import { IconCheck, IconAlertCircle, IconClose } from '../Icons';
 import styles from './Toast.module.css';
 
 export type ToastType = 'success' | 'error' | 'warning' | 'info';

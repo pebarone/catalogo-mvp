@@ -7,13 +7,10 @@ import type { Transition, Variants } from 'motion/react';
  * Fornece presets de spring, transições e variantes GPU-accelerated
  */
 
+import { iosSpring } from '../utils/animations';
+
 // Spring presets otimizados
-const MOBILE_SPRING: Transition = {
-  type: 'spring',
-  damping: 30,
-  stiffness: 400,
-  mass: 0.8,
-};
+const MOBILE_SPRING: Transition = iosSpring;
 
 const DESKTOP_SPRING: Transition = {
   type: 'spring',

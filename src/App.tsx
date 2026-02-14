@@ -78,7 +78,7 @@ const TitleUpdater = () => {
     }
 
     document.title = `${baseTitle} | ${pageTitle}`;
-  }, [location]);
+  }, [location.pathname]);
 
   return null;
 };

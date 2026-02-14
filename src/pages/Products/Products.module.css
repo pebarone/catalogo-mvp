@@ -77,6 +77,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2.5rem;
+  /* content-visibility: auto; - Removed to prevent clipping on hover */
+  /* contain-intrinsic-size: 1px 5000px; - Removed to prevent clipping on hover */
 }
 
 /* Alinha todos os cards para a mesma altura */
@@ -602,18 +604,20 @@
     font-size: 0.75rem;
   }
 
-  /* Reduzir tamanho do coração no mobile */
+  /* Reduzir tamanho dos botões no mobile */
   .cardActions {
     padding: 0 0.75rem 0.75rem 0.75rem;
   }
 
-  .favoriteBtn {
+  .favoriteBtn,
+  .whatsappBtn {
     height: 40px;
     border-radius: 10px;
   }
 
-  /* Ícone menor no mobile */
-  .favoriteBtn svg {
+  /* Ícones menores no mobile */
+  .favoriteBtn svg,
+  .whatsappBtn svg {
     width: 18px;
     height: 18px;
   }

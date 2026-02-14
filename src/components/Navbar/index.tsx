@@ -10,10 +10,10 @@ import {
   IconMail, 
   IconDashboard,
   IconHeart
-} from './Icons';
-import { useAuth } from '../contexts/AuthContext';
-import { LoginModal } from './LoginModal';
-import { RegisterModal } from './RegisterModal';
+} from '../Icons';
+import { useAuth } from '../../contexts/AuthContext';
+import { LoginModal } from '../LoginModal';
+import { RegisterModal } from '../RegisterModal';
 import styles from './Navbar.module.css';
 
 const baseLinks = [
@@ -103,7 +103,7 @@ export const Navbar = () => {
           {/* Mobile Toggle */}
           <button 
             className={styles.menuToggle} 
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => setIsOpen(prev => !prev)}
             aria-label="Toggle menu"
           >
             {isOpen ? <IconClose size={24} color="#6A4C93" /> : <IconMenu size={24} color="#6A4C93" />}

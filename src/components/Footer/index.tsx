@@ -1,4 +1,4 @@
-import { IconHeart, IconInstagram } from './Icons';
+import { IconHeart, IconInstagram } from '../Icons';
 import styles from './Footer.module.css';
 
 export const Footer = () => {

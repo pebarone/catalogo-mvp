@@ -1,16 +1,16 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { productsApi } from '../services/api';
-import type { Product } from '../services/api';
+import { productsApi } from '../../services/api';
+import type { Product } from '../../services/api';
 import styles from './Products.module.css';
-import { useAuth } from '../contexts/AuthContext';
-import { useFavorites } from '../contexts/FavoritesContext';
-import { ProductCard } from '../components/ProductCard';
-import { ProductFilters } from '../components/ProductFilters';
-import { useProductFilters } from '../hooks/useProductFilters';
-import { useMobileAnimations } from '../hooks/useMobileAnimations';
-import { useToast } from '../hooks/useToast';
-import { ToastContainer } from '../components/Toast';
+import { useAuth } from '../../contexts/AuthContext';
+import { useFavorites } from '../../contexts/FavoritesContext';
+import { ProductCard } from '../../components/ProductCard';
+import { ProductFilters } from '../../components/ProductFilters';
+import { useProductFilters } from '../../hooks/useProductFilters';
+import { useMobileAnimations } from '../../hooks/useMobileAnimations';
+import { useToast } from '../../hooks/useToast';
+import { ToastContainer } from '../../components/Toast';
 
 export const Products = () => {
   const { isAuthenticated } = useAuth();

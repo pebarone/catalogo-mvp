@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { IconMail, IconKey, IconEye, IconEyeOff, IconAlertCircle, IconUserPlus } from './Icons';
-import { useAuth } from '../contexts/AuthContext';
-import { isValidEmail } from '../services/api';
-import { useMobileAnimations } from '../hooks/useMobileAnimations';
-import styles from './LoginModal.module.css'; // Reusa os estilos do LoginModal
+import { IconMail, IconKey, IconEye, IconEyeOff, IconAlertCircle, IconUserPlus } from '../Icons';
+import { useAuth } from '../../contexts/AuthContext';
+import { isValidEmail } from '../../services/api';
+import { useMobileAnimations } from '../../hooks/useMobileAnimations';
+import styles from '../LoginModal/LoginModal.module.css'; // Reusa os estilos do LoginModal
 
 interface RegisterModalProps {
   isOpen: boolean;

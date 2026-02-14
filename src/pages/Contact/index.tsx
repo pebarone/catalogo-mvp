@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { IconInstagram, IconMail, IconMapPin, IconPhone } from '../components/Icons';
+import { IconInstagram, IconMail, IconMapPin, IconPhone } from '../../components/Icons';
 import styles from './Contact.module.css';
 
 export const Contact = () => {

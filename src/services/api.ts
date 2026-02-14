@@ -1,60 +1,33 @@
 // API Service - Comunicação com o backend
 import { cacheService } from './cache';
+import type { 
+  Product, 
+  ProductList, 
+  User, 
+  UserList, 
+  LoginResponse, 
+  RefreshResponse, 
+  Favorite, 
+  CategoryInfo,
+  ProductsQueryParams,
+  UsersQueryParams
+} from '../types';
+
+// Re-export types for backward compatibility
+export type { 
+  Product, 
+  ProductList, 
+  User, 
+  UserList, 
+  LoginResponse, 
+  RefreshResponse, 
+  Favorite, 
+  CategoryInfo,
+  ProductsQueryParams,
+  UsersQueryParams
+};
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
-
-// Tipos baseados no swagger.yaml v2.0.0
-export interface Product {
-  id: string;
-  name: string;
-  price: number;
-  category: string;
-  subcategory?: string | null; // NOVO: Sistema de subcategorias
-  image_url: string;
-  is_featured?: boolean; // NOVO: Sistema de destaques
-  description?: string;
-  created_at?: string;
-}
-
-export interface ProductList {
-  products: Product[];
-  total: number;
-  page: number;
-  maxResults: number;
-}
-
-export interface User {
-  id: string;
-  email: string;
-  role?: 'user' | 'admin'; // Atualizado: role ao invés de is_admin
-  created_at?: string;
-}
-
-export interface UserList {
-  users: User[];
-  total: number;
-  page: number;
-  maxResults: number;
-}
-
-export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: string;
-  user: User;
-}
-
-export interface RefreshResponse {
-  accessToken: string;
-  expiresIn: string;
-}
-
-export interface Favorite {
-  id: string;
-  user_id: string;
-  product_id: string;
-  created_at: string;
-}
 
 // Chaves de armazenamento de tokens
 const ACCESS_TOKEN_KEY = 'auth_access_token';
@@ -368,19 +341,6 @@ export const authApi = {
 
 // ============ Products API ============
 
-export interface ProductsQueryParams {
-  maxResults?: number;
-  page?: number;
-  category?: string;
-  subcategory?: string | string[];
-}
-
-export interface CategoryInfo {
-  category: string;
-  subcategories: string[];
-  productCount: number;
-}
-
 export const productsApi = {
   /**
    * Lista produtos com paginação e filtros
@@ -692,11 +652,6 @@ export const favoritesApi = {
 };
 
 // ============ Users API (Admin) ============
-
-export interface UsersQueryParams {
-  maxResults?: number;
-  page?: number;
-}
 
 export const usersApi = {
   /**
