@@ -167,8 +167,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 2rem;
-  content-visibility: auto;
-  contain-intrinsic-size: 1px 500px; 
+  /* content-visibility: auto; Removed specifically to prevent clipping on hover, just like in the products page! */
 }
 
 .cardLink {
@@ -181,6 +180,7 @@
   border-radius: 20px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  transform-style: preserve-3d; /* This fixes the rounded corners clipping bug when image transforms */
 }
 
 .cardImageWrapper {
